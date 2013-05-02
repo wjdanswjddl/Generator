@@ -69,7 +69,8 @@ print GVRS "#define GRELCODE(a,b,c) (((a) << 16) + ((b) << 8) + (c)) \n\n";
 print GVRS "#define __GENIE_RELEASE__      \"$release\"\n";
 print GVRS "#define __GENIE_RELEASE_CODE__ GRELCODE($major,$minor,$revis) \n\n";
 
-# print the commit number even if it is unresolved (-1) -> that flags that it is unresolved...
+# print the commit number even if it is unresolved (-1) -> that flags that it
+# is unresolved...
 print GVRS "#define __GENIE_GIT_REVISION__ \"$git_revision\" \n\n";
 
 if($major == 999 && $minor == 999 && $revis == 999) {
