@@ -234,7 +234,7 @@ void FGMBodekRitchie::LoadConfig(void)
 {
   this->GetParam( "FermiMomentumTable", fKFTable);
 
-  
+
   // Default value 4.0 from original paper by A. Bodek and J. L. Ritchie. Phys. Rev. D 23, 1070
   this->GetParamDef("MomentumMax", fPMax, 4.0);
   this->GetParam("RFG-MomentumCutOff", fPCutOff);
