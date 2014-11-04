@@ -12,6 +12,13 @@ is available in LHAPDF 5.9.x. The patched version recreates:
 
 It can be found in $GENIE/data/evgen/pdfs
 
+The PDF set GRV98lo_patched was producted by Graeme Watt (Durham, UK) 
+to correct a kink in the PDFs for the default version of GRV98lo that
+is available in LHAPDF 5.9.x. The patched version recreates:
+  http://hepdata.cedar.ac.uk//hepdata/pdflib/grv/grv98/grv98.f 
+
+It can be found in $GENIE/data/evgen/pdfs
+
 Configurable Parameters:
 ................................................................................................
 Name             Type     Optional   Comment                        Default
