@@ -150,6 +150,8 @@ string   gOptFlux;             // input flux (function or flux file)
 string   gOptEvFilePrefix;     // event file prefix
 bool     gOptUsingFlux=false;  // using kinetic energy distribution?
 long int gOptRanSeed ;         // random number seed
+string   gOptDeexcitationModelINCL;
+bool     UseDeexcitationModel=false; // User define a de-excitation model
 
 TH1D * gSpectrum  = 0;
 
@@ -178,6 +180,21 @@ int main(int argc, char ** argv)
 
   // Get the specified INTRANUKE model
   const EventRecordVisitorI * intranuke = GetIntranuke();
+//___________________Input for INCL++____________________________________________
+if(gOptMode=="HINCL"){
+ofstream inputincl;
+PDGLibrary * pdglib = PDGLibrary::Instance();
+EventRecord * evrec = InitializeEvent();
+inputincl.open("inputincl.in");
+inputincl<<"number-shots = "<<gOptNevents<<endl;
+inputincl<<"target = "<<pdglib->Find(gOptTgtPdgCode)->GetName()<<endl;
+inputincl<<"projectile = "<<pdglib->Find(gOptProbePdgCode)->GetName()<<endl;
+inputincl<<"energy = "<<gOptProbeKE*1000<<endl;
+if(UseDeexcitationModel) inputincl<<"de-excitation = "<<gOptDeexcitationModelINCL<<endl;
+intranuke->ProcessEventRecord(evrec);
+delete evrec;
+return 0;
+}
 
   // Initialize an Ntuple Writer to save GHEP records into a ROOT tree
   NtpWriter ntpw(kNFGHEP, gOptRunNu);
@@ -264,6 +281,10 @@ const EventRecordVisitorI * GetIntranuke(void)
   else
   if(gOptMode.compare("hN2018")==0) {
      sname = "genie::HNIntranuke2018";
+     sconf = "Default";
+  }  else
+  if(gOptMode.compare("HINCL")==0) {
+     sname = "genie::HINCLCascade";
      sconf = "Default";
   }
   else {
@@ -554,6 +575,12 @@ void GetCommandLineArgs(int argc, char ** argv)
         << gOptFlux;
   }
 
+  // De-excitation Model for INCL++
+  if(parser.OptionExists('d')){
+    gOptDeexcitationModelINCL = parser.ArgAsString('d');
+    UseDeexcitationModel = true;
+    LOG("gevgen_hadron ", pINFO) << "INCL++  with de-excitation Model = "<< gOptDeexcitationModelINCL;
+  }
   LOG("gevgen_hadron", pNOTICE) << "\n";
   LOG("gevgen_hadron", pNOTICE) << *RunOpt::Instance();
 }
