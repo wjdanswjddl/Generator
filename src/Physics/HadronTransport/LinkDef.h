@@ -21,6 +21,7 @@
 #pragma link C++ class genie::HAIntranuke2018;
 #pragma link C++ class genie::HNIntranuke2018;
 
-
+#pragma link C++ class genie::HINCLCascade;
+#pragma link C++ class genie::INCLCascade;
 
 #endif
