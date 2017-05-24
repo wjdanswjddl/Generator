@@ -6,6 +6,7 @@
    <config alg="genie::EventGenerator">              EventGenerator.xml              </config>
    <config alg="genie::FermiMover">                  FermiMover.xml                  </config>
    <config alg="genie::HadronTransporter">           HadronTransporter.xml           </config>
+   <config alg="genie::HINCLCascade">                HINCLCascade.xml                   </config>
    <config alg="genie::HAIntranuke">                 HAIntranuke.xml                 </config>
    <config alg="genie::HAIntranuke2018">             HAIntranuke2018.xml             </config>
    <config alg="genie::HNIntranuke2018">             HNIntranuke2018.xml             </config>
