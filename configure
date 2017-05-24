@@ -35,6 +35,7 @@ if(($match = grep(/--help/i, @ARGV)) > 0) {
   print "    geom-drivers         Built-in detector geometry drivers                          default: enabled  \n";
   print "    masterclass          Enable GENIE neutrino masterclass app                       default: disabled (Experimental) \n";
   print "    test                 Build test programs                                         default: disabled \n";
+  print "    incl              Enable INCL libraries                                       default: disabled (Experimental) \n";
   print "\n options for 3rd party software, prefix with --with- (eg --with-lhapdf5-lib=/some/path/)\n\n";
   print "    compiler          Compiler to use (any of clang,gcc)                          default: gcc \n";
   print "    optimiz-level     Compiler optimization        any of O,O2,O3,OO,Os / default: O2 \n";
@@ -48,7 +49,9 @@ if(($match = grep(/--help/i, @ARGV)) > 0) {
   print "    libxml2-inc       Path to libxml2 includes     always needed                       (if unset: tries to auto-detect it) \n";
   print "    libxml2-lib       Path to libxml2 library      always needed                       (if unset: tries to auto-detect it) \n";
   print "    log4cpp-inc       Path to log4cpp includes     always needed                       (if unset: tries to auto-detect it) \n";
-  print "    log4cpp-lib       Path to log4cpp library      always needed                       (if unset: tries to auto-detect it) \n\n";
+  print "    log4cpp-lib       Path to log4cpp library      always needed                       (if unset: tries to auto-detect it) \n";
+  print "    incl-inc          Path to incl includes     always needed                       (if unset: tries to auto-detect it) \n";
+  print "    incl-lib          Path to incl library      always needed                       (if unset: tries to auto-detect it) \n\n";
   print "If the printout was too long then pipe it through a pager, eg: \n";
   print "./configure --help | more \n";
   exit 0;
@@ -165,6 +168,7 @@ if(($match = grep(/--enable-nucleon-decay/i,       @ARGV)) > 0) { $gopt_enable_n
 if(($match = grep(/--enable-nnbar-oscillation/i,   @ARGV)) > 0) { $gopt_enable_nnbar_oscillation = "YES"; }
 if(($match = grep(/--enable-boosted-dark-matter/i, @ARGV)) > 0) { $gopt_enable_boosted_dark_mat  = "YES"; }
 if(($match = grep(/--enable-masterclass/i,         @ARGV)) > 0) { $gopt_enable_masterclass       = "YES"; }
+if(($match = grep(/--enable-incl/i,             @ARGV)) > 0) { $gopt_enable_incl             = "YES"; }
 
 # LHAPDF6 and 5 are mutually exlusive
 if  ($gopt_enable_lhapdf6 eq "YES") { $gopt_enable_lhapdf5 = "NO";}
@@ -475,6 +479,57 @@ if(! -d $gopt_with_log4cpp_lib) {
   print "*** Error *** You need to specify the log4cpp library path using --with-log4cpp-lib=/some/path/\n\n";
   exit 1;
 }
+# If --enable-incl was set then the full path to the INCL library must be specified
+#
+my $gopt_with_incl_lib = "";
+if($gopt_enable_incl eq "YES") {
+  if(($match = grep(/--with-incl-lib/i, @ARGV)) > 0) { 
+    $options=~m/--with-incl-lib=(\S*)/i;
+    $gopt_with_incl_lib = $1;
+  }
+  if(! -d $gopt_with_incl_lib)  {
+    print "\n*** Warning *** INCL has been enabled but you didn't specify the INCL library path \n";
+  }
+  # if it was not set, try to pick it up from the environment
+  if($gopt_with_incl_lib eq "" && defined $ENV{'INCL_LIB'}) { 
+     $gopt_with_incl_lib = $ENV{'INCL_LIB'}; 
+     print "The \$INCL_LIB env var is defined. I will pick that and use --with-incl-lib=$gopt_with_incl_lib\n";
+  }
+  
+  # check
+  my $fileso    = "$gopt_with_incl_lib/libINCL_Physics.so";
+  my $filea = "$gopt_with_incl_lib/libINCL_Physics.a";
+  if(! -e $fileso && ! -e $filea) {
+     print "*** Error *** You need to specify the path to libINCL_Physics using --with-incl-lib=/some/path/\n";
+     print "*** Error *** Otherwise, you should --disable-incl\n\n";
+     exit 1;
+  }
+}
+# If --enable-incl was set then the full path to the INCL includes must be specified
+#
+my $gopt_with_incl_inc = "";
+if($gopt_enable_incl eq "YES") {
+  if(($match = grep(/--with-incl-inc/i, @ARGV)) > 0) { 
+    $options=~m/--with-incl-inc=(\S*)/i;
+    $gopt_with_incl_inc = $1;
+  }
+  if(! -d $gopt_with_incl_inc)  {
+    print "\n*** Warning *** INCL has been enabled but you didn't specify the INCL includes path \n";
+  }
+  # if it was not set, try to pick it up from the environment
+  if($gopt_with_incl_inc eq "" && defined $ENV{'INCL_INC'}) { 
+     $gopt_with_incl_inc = $ENV{'INCL_INC'}; 
+     print "The \$INCL_INC env var is defined. I will pick that and use --with-incl-inc=$gopt_with_incl_inc\n";
+  }
+  
+  # check
+  my $file = "$gopt_with_incl_inc/G4INCLCascade.hh";
+  if(! -e $file) {
+     print "*** Error *** You need to specify the path to G4INCLCascade.hh using --with-incl-inc=/some/path/\n";
+     print "*** Error *** Otherwise, you should --disable-incl\n\n";
+     exit 1;
+  }
+}
 
 # Save config options
 #
@@ -494,6 +549,7 @@ print MKCONF "GOPT_ENABLE_PROFILER=$gopt_enable_profiler\n";
 print MKCONF "GOPT_ENABLE_DOXYGEN_DOC=$gopt_enable_doxygen_doc\n"; 
 print MKCONF "GOPT_ENABLE_DYLIBVERSION=$gopt_enable_dylibversion\n";
 print MKCONF "GOPT_ENABLE_LOW_LEVEL_MESG=$gopt_enable_lowlevel_mesg\n";
+print MKCONF "GOPT_ENABLE_INCL=$gopt_enable_incl\n";
 print MKCONF "GOPT_WITH_COMPILER=$gopt_with_compiler\n";
 print MKCONF "GOPT_WITH_CXX_DEBUG_FLAG=$gopt_with_cxx_debug_flag\n";
 print MKCONF "GOPT_WITH_CXX_OPTIMIZ_FLAG=-$gopt_with_cxx_optimiz_flag\n";
@@ -508,6 +564,8 @@ print MKCONF "GOPT_WITH_LIBXML2_INC=$gopt_with_libxml2_inc\n";
 print MKCONF "GOPT_WITH_LIBXML2_LIB=$gopt_with_libxml2_lib\n";
 print MKCONF "GOPT_WITH_LOG4CPP_INC=$gopt_with_log4cpp_inc\n";
 print MKCONF "GOPT_WITH_LOG4CPP_LIB=$gopt_with_log4cpp_lib\n";
+print MKCONF "GOPT_WITH_INCL_INC=$gopt_with_incl_inc\n";
+print MKCONF "GOPT_WITH_INCL_LIB=$gopt_with_incl_lib\n";
 
 close(MKCONF);
 
