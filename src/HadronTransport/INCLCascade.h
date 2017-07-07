@@ -1,24 +1,3 @@
-//____________________________________________________________________________
-/*!
-
-\class    genie::INCLCascade
-
-\brief    Link to INCL++ intranuclear hadron transport MC.
-          Is a concrete implementation of the EventRecordVisitorI interface.
-
-          Current INTRANUKE development is led by Pittsburgh/Antananarivo group
-
-\author   Steve Dytman <dytman+@pitt.edu>, Pittsburgh University
-          Marc Vololoniaina <narymarc@yahoo.com>, Pittsburgh University/Antananarivo
-
-\created  May 23, 2017
-
-\cpright  Copyright (c) 2003-2016, GENIE Neutrino MC Generator Collaboration
-          For the full text of the license visit http://copyright.genie-mc.org
-          or see $GENIE/LICENSE
-*/
-//____________________________________________________________________________
-
 #ifndef _INCL_test_H_
 #define _INCL_test_H_
 #include <string>
@@ -48,8 +27,8 @@ namespace genie{
   INCLCascade(string name);
   INCLCascade(string name, string config);
   ~INCLCascade();
-  int INCLcascade(int arg, char * test[]) const;
-  int INCLtopdgcode(int A, int Z)const;
+  int INCLcascade(int arg, char * test[],GHepRecord * event_rec) const;
+//  int INCLtopdgcode(int A, int Z)const;
   int pdgcpiontoA(int pdgc)const;
   int pdgcpiontoZ(int pdgc)const;
     //void INCLprint() const;
