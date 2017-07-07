@@ -180,21 +180,25 @@ int main(int argc, char ** argv)
 
   // Get the specified INTRANUKE model
   const EventRecordVisitorI * intranuke = GetIntranuke();
-//___________________Input for INCL++____________________________________________
-if(gOptMode=="HINCL"){
-ofstream inputincl;
-PDGLibrary * pdglib = PDGLibrary::Instance();
-EventRecord * evrec = InitializeEvent();
-inputincl.open("inputincl.in");
-inputincl<<"number-shots = "<<gOptNevents<<endl;
-inputincl<<"target = "<<pdglib->Find(gOptTgtPdgCode)->GetName()<<endl;
-inputincl<<"projectile = "<<pdglib->Find(gOptProbePdgCode)->GetName()<<endl;
-inputincl<<"energy = "<<gOptProbeKE*1000<<endl;
-if(UseDeexcitationModel) inputincl<<"de-excitation = "<<gOptDeexcitationModelINCL<<endl;
-intranuke->ProcessEventRecord(evrec);
-delete evrec;
-return 0;
-}
+
+  //___________Input for INCL++____________________________________________
+  if ( gOptMode == "HINCL" ) {
+    ofstream inputincl;
+    PDGLibrary* pdglib = PDGLibrary::Instance();
+    EventRecord* evrec = InitializeEvent();
+    inputincl.open("inputincl.in");
+    inputincl << "number-shots = " << gOptNevents << '\n';
+    inputincl << "target = "
+      << pdglib->Find(gOptTgtPdgCode)->GetName() << '\n';
+    inputincl << "projectile = " << pdglib->Find(gOptProbePdgCode)->GetName()
+      << '\n';
+    inputincl << "energy = " << gOptProbeKE*1000 << '\n';
+    if (UseDeexcitationModel) inputincl << "de-excitation = "
+      << gOptDeexcitationModelINCL << '\n';
+    intranuke->ProcessEventRecord(evrec);
+    delete evrec;
+    return 0;
+  }
 
   // Initialize an Ntuple Writer to save GHEP records into a ROOT tree
   NtpWriter ntpw(kNFGHEP, gOptRunNu);
