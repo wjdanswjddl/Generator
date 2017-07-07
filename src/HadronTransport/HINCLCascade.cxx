@@ -1,20 +1,3 @@
-//____________________________________________________________________________
-/*
- Copyright (c) 2003-2016, GENIE Neutrino MC Generator Collaboration
- For the full text of the license visit http://copyright.genie-mc.org
- or see $GENIE/LICENSE
-
- Author: Steve Dytman <dytman+@pitt.edu>, Pittsburgh Univ.
-         Marc Vololoniaina <narymarc@yahoo.com>, Univ. Antananarivo, Madagascar/Pittsburgh Univ.
-
-         May 23, 2017
-
- For the class documentation see the corresponding header file.
-
- Important revisions after version 2.12.8 :
-*/
-//____________________________________________________________________________
-//---------------------
 #include <cstdlib>
 #include <sstream>
 
