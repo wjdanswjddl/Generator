@@ -177,8 +177,8 @@ int INCLCascade::INCLcascade(int argc1, char *test[],GHepRecord * evrec) const {
 #ifdef INCL_SIGNAL_HANDLING
   enableSignalHandling();
 #endif
-  
-  G4INCL::INCL *theINCLModel = new G4INCL::INCL(theConfig); 
+ if(!theINCLModel){
+  theINCLModel = new G4INCL::INCL(theConfig);}  
   
 
   int nShots = theConfig->getNumberOfShots();
