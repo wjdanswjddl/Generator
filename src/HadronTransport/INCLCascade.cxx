@@ -13,6 +13,9 @@
 #include <sstream>
 
 #include <TMath.h>
+
+#include "INCLInterfacetoGENIE.hh"
+//#include "G4INCLNuclearMassTable.hh"
 #include "G4INCLParticleTable.hh"
 #include "G4INCLGlobals.hh" 
 
@@ -177,8 +180,9 @@ int INCLCascade::INCLcascade(int argc1, char *test[],GHepRecord * evrec) const {
 #ifdef INCL_SIGNAL_HANDLING
   enableSignalHandling();
 #endif
- if(!theINCLModel){
-  theINCLModel = new G4INCL::INCL(theConfig);}  
+  
+  if(!theINCLModel){
+  theINCLModel = new G4INCL::INCL(theConfig);}
   
 
   int nShots = theConfig->getNumberOfShots();
@@ -229,7 +233,7 @@ int INCLCascade::INCLcascade(int argc1, char *test[],GHepRecord * evrec) const {
    */
   GMCJMonitor mcjmonitor(1);
   int Countevent = 0;
-  int Countevent_tr =0;
+  //int Countevent_tr =0;
     GHepStatus_t    ist1  = kIStStableFinalState;
   int pdg_codeProbe = 0;
   double m_probe(0), m_pnP(0),E_pnP(0), EKinP(0);
@@ -247,27 +251,26 @@ int i(0);
     if(theConfig->getProjectileSpecies().theType != Composite){
      m_probe = ParticleTable::getRealMass(theConfig->getProjectileSpecies().theType);}
      else {
-       m_probe = ParticleTable::getRealMass(theConfig->getProjectileSpecies().theA,theConfig->getProjectileSpecies().theZ);}
+       m_probe = ParticleTable::getRealMass(theConfig->getProjectileSpecies().theA,theConfig->getProjectileSpecies().theZ);
+     }
        double m_target = ParticleTable::getTableMass(result.At, result.Zt);
-       double E_probe = m_probe + theConfig->getProjectileKineticEnergy();
-       double pz_p = TMath::Sqrt(TMath::Power(E_probe,2)-TMath::Power(m_probe,2));
-       //EventRecord * evrec = new EventRecord();
-       //Interaction * interaction = new Interaction;
-       //evrec->AttachSummary(interaction);
-       TLorentzVector p4h   (0.,0.,pz_p/1000,E_probe/1000);
+        GHepParticle * fsProbe = evrec->Probe();
+      // double E_probe = m_probe + theConfig->getProjectileKineticEnergy();
+       //double pz_p = TMath::Sqrt(TMath::Power(E_probe,2)-TMath::Power(m_probe,2));
+
+       TLorentzVector p4h   (0.,0.,fsProbe->Pz(),fsProbe->E());
+       //TLorentzVector p4h   (0.,0.,pz_p/1000,E_probe/1000);
        TLorentzVector x4null(0.,0.,0.,0.);
        TLorentzVector p4tgt (0.,0.,0.,m_target/1000);
        int pdg_codeTarget= genie::pdg::IonPdgCode(theConfig->getTargetA(), theConfig->getTargetZ());
-
+       INCL_DEBUG("End of event " << i << std::endl);
        if (result.transparent==1) {
-        Countevent_tr++; 
         evrec->AddParticle(pdg_codeProbe, ist1, 0,-1,-1,-1, p4h,x4null);
-        evrec->AddParticle(pdg_codeTarget,ist1,1,-1,-1,-1,p4tgt,x4null);
-      }
-      INCL_DEBUG("End of event " << i << std::endl);
-      if( result.transparent ) {
+        evrec->AddParticle(pdg_codeTarget,kIStFinalStateNuclearRemnant,1,-1,-1,-1,p4tgt,x4null);
+        //evrec->AddParticle(pdg_codeTarget,ist1,1,-1,-1,-1,p4tgt,x4null);
         INCL_DEBUG("Transparent event" << std::endl);
-      } else {
+      }
+      else {
         INCL_DEBUG("Number of produced particles: " << result.nParticles << std::endl);
         if(theDeExcitation != 0) {
           theDeExcitation->deExcite(&result);
@@ -277,19 +280,18 @@ int i(0);
           double gamma = G4INCL::KinematicsUtils::gammaFromKineticEnergy(theConfig->getProjectileSpecies(), theConfig->getProjectileKineticEnergy());
           result.fillInverseKinematics(gamma);
         }
+        int mom = 1;
         for (int nP = 0; nP < result.nParticles; nP++){
-         GHepParticle *p_outR =INCLtoGenieParticle(result,nP,kIStStableFinalState,0,-1);
-         evrec->AddParticle(*p_outR); 
+          if(nP==result.nParticles -1){GHepParticle *p_outR =INCLtoGenieParticle(result,nP,kIStFinalStateNuclearRemnant,mom,-1);
+            evrec->AddParticle(*p_outR); 
+          }
+          else {
+            GHepParticle *p_outR =INCLtoGenieParticle(result,nP,kIStStableFinalState,0,-1);
+            evrec->AddParticle(*p_outR); 
+          }
+                  
        }
      }
-
-
-  // } Loop INCLCascade
-
-   // if(theDeExcitation != 0) {
-   //  delete theDeExcitation;
-  // }
- // delete theINCLModel;
   return 0;
 }
 
@@ -515,7 +517,11 @@ if(!theINCLModel){
     delete sp;
   }
     else{
-       Postion_evrec.push_back(icurr);
+    //  excitaionERES << result.EStarRem[0] <<std::endl;
+  //if (is_DIS==true) std::cout<< " XXDIS***************** "<< result.EStarRem[0] << std::endl;
+   // if (is_RES==true) std::cout<< " XXRES***************** "<< result.EStarRem[0] << std::endl;
+   // if (is_CCQE==true) std::cout<<" XXCCQE**************** "<< result.EStarRem[0] << std::endl;
+    Postion_evrec.push_back(icurr);
     ListeOfINCLresult.push_back(result);   
   }
  
@@ -567,6 +573,8 @@ if(is_DIS == false && is_RES == false){ // QE - event
           ListeOfINCLresult.at(it).pyRem[0]= the_pyRemn + (pyRemn*1000);
           ListeOfINCLresult.at(it).pzRem[0]= the_pzRemn + (1000*pzRemn);
           ListeOfINCLresult.at(it).EStarRem[0]=ExcitaionE; 
+          if (is_DIS==true) std::cout<< " XXEXTOTDIS****** "<< ListeOfINCLresult.at(it).EStarRem[0] <<std::endl;
+          if (is_RES==true) std::cout<< " XXEXTOTRES****** "<< ListeOfINCLresult.at(it).EStarRem[0] <<std::endl;
           theDeExcitation->deExcite(&ListeOfINCLresult.at(it));
           for(int nP=0;nP<ListeOfINCLresult.at(it).nParticles;nP++ )
           {
