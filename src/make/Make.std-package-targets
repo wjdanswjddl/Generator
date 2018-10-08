@@ -162,7 +162,7 @@ purge:
 .PHONY: clean
 clean:
 	@echo "Clean in $(PACKAGE)"
-	$(RM) -f *.rootmap *.rootmap.bak *.pcm *.d *.o *~ core a.out Makefile.temp
+	$(RM) -f *.rootmap *.rootmap.bak *.pcm *.d *.o *~ core a.out Makefile.temp *.mod
 ifneq ($(strip $(DICTIONARY)),undefined)
 	$(RM) -f $(DICTIONARY)* $(GENIE_LIB_PATH)/$(DICTIONARY)* 
 endif
