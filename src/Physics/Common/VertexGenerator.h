@@ -3,7 +3,7 @@
 
 \class    genie::VertexGenerator
 
-\brief    
+\brief
 
 \author   Costas Andreopoulos <costas.andreopoulos \at stfc.ac.uk>
           University of Liverpool & STFC Rutherford Appleton Lab
@@ -42,7 +42,14 @@ public :
 
   //-- Generate the vertex position
   //   public so other classes can reuse this code to generate a position
-  TVector3 GenerateVertex(const Interaction * in,double A) const;
+  TVector3 GenerateVertex(const Interaction * in, double A) const;
+
+  /// Returns the probability density (normalized to 1 within the range
+  /// [0, Rmax]) to sample a vertex at radius r.
+  double ProbDensity(int A, double r) const;
+
+  /// Returns the maximum radius that may be sampled for a vertex position
+  double RMax(int A) const;
 
 private:
   void  LoadConfig (void);

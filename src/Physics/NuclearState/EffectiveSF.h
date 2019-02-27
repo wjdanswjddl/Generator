@@ -54,6 +54,21 @@ public:
   void Configure (const Registry & config);
   void Configure (string param_set);
 
+  // Add "override" specifiers when GENIE moves to C++11
+  // Note that, for this nuclear model, the removal energy is constant
+  inline virtual double MinRemovalEnergy(const Target& t, double) const /*override*/
+    { return ReturnBindingEnergy(t); }
+  inline virtual double MaxRemovalEnergy(const Target& t, double) const /*override*/
+    { return ReturnBindingEnergy(t); }
+
+  inline virtual double MinMomentum(const Target&, double) const /*override*/
+    { return 0.; }
+  inline virtual double MaxMomentum(const Target&, double) const /*override*/
+    { return fPMax; }
+
+  double ProbDensity(double mom, double w, const Target& t, double r = 0.)
+    const /*override*/;
+
 private:
   TH1D * ProbDistro (const Target & t) const;
 
@@ -68,6 +83,11 @@ private:
 
   double Returnf1p1h(const Target & target) const;
   void   LoadConfig (void);
+
+  /// Helper private version of ProbDensity that also retrieves the width of
+  /// the relevant bin
+  double ProbDensity(double mom, double w, const Target& target,
+    double r, double& bin_width) const;
 
   mutable map<string, TH1D *> fProbDistroMap;
   double fPMax;

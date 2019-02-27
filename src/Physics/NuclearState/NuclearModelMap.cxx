@@ -178,3 +178,44 @@ const NuclearModelI * NuclearModelMap::SelectModel(const Target & t) const
   else return fDefGlobModel;
 }
 //____________________________________________________________________________
+double NuclearModelMap::MinRemovalEnergy(const Target& target, double hitNucleonRadius) const
+{
+  const NuclearModelI * nm = this->SelectModel(target);
+  if ( !nm ) return false;
+
+  return nm->MinRemovalEnergy(target, hitNucleonRadius);
+}
+//____________________________________________________________________________
+double NuclearModelMap::MaxRemovalEnergy(const Target& target, double hitNucleonRadius) const
+{
+  const NuclearModelI * nm = this->SelectModel(target);
+  if ( !nm ) return false;
+
+  return nm->MaxRemovalEnergy(target, hitNucleonRadius);
+}
+//____________________________________________________________________________
+double NuclearModelMap::MinMomentum(const Target& target, double hitNucleonRadius) const
+{
+  const NuclearModelI * nm = this->SelectModel(target);
+  if ( !nm ) return false;
+
+  return nm->MinMomentum(target, hitNucleonRadius);
+}
+//____________________________________________________________________________
+double NuclearModelMap::MaxMomentum(const Target& target, double hitNucleonRadius) const
+{
+  const NuclearModelI * nm = this->SelectModel(target);
+  if ( !nm ) return false;
+
+  return nm->MaxMomentum(target, hitNucleonRadius);
+}
+//____________________________________________________________________________
+double NuclearModelMap::ProbDensity(double p, double w, const Target & target,
+  double hitNucRadius) const
+{
+  const NuclearModelI * nm = this->SelectModel(target);
+  // TODO: issue warning here?
+  if ( !nm ) return 0.;
+
+  return nm->ProbDensity(p, w, target, hitNucRadius);
+}

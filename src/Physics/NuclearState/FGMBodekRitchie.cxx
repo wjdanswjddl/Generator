@@ -98,30 +98,18 @@ bool FGMBodekRitchie::GenerateNucleon(const Target & target) const
   fCurrMomentum.SetXYZ(px,py,pz);
 
   //-- set removal energy
-  //
-  if ( target.A() < 6 || ! fUseParametrization )
-  {
-     int Z = target.Z();
-     map<int,double>::const_iterator it = fNucRmvE.find(Z);
-     if(it != fNucRmvE.end()) fCurrRemovalEnergy = it->second;
-     else fCurrRemovalEnergy = nuclear::BindEnergyPerNucleon(target);
-  }
-  else {
-     fCurrRemovalEnergy = nuclear::BindEnergyPerNucleonParametrization(target);
-  }
+  fCurrRemovalEnergy = GetRemovalEnergy( target );
 
   return true;
 }
 //____________________________________________________________________________
 double FGMBodekRitchie::Prob(double mom, double w, const Target & target) const
 {
-  if(w<0) {
-     TH1D * prob_distr = this->ProbDistro(target);
-     int bin = prob_distr->FindBin(mom);
-     double y  = prob_distr->GetBinContent(bin);
-     double dx = prob_distr->GetBinWidth(bin);
-     double prob = y*dx;
-     return prob;
+  if (w < 0) {
+    double bin_width = 0.;
+    double prob_density = this->ProbDensity(mom, w, target, 0., bin_width);
+    double prob = prob_density * bin_width;
+    return prob;
   }
   return 1;
 }
@@ -234,7 +222,7 @@ void FGMBodekRitchie::LoadConfig(void)
 {
   this->GetParam( "FermiMomentumTable", fKFTable);
 
-  
+
   // Default value 4.0 from original paper by A. Bodek and J. L. Ritchie. Phys. Rev. D 23, 1070
   this->GetParamDef("MomentumMax", fPMax, 4.0);
   this->GetParam("RFG-MomentumCutOff", fPCutOff);
@@ -280,3 +268,40 @@ void FGMBodekRitchie::LoadConfig(void)
 #endif
 }
 //____________________________________________________________________________
+double FGMBodekRitchie::GetRemovalEnergy(const Target& target) const
+{
+  double E_remove = 0.;
+  if ( target.A() < 6 || ! fUseParametrization )
+  {
+     int Z = target.Z();
+     map<int,double>::const_iterator it = fNucRmvE.find(Z);
+     if(it != fNucRmvE.end()) E_remove = it->second;
+     else E_remove = nuclear::BindEnergyPerNucleon(target);
+  }
+  else {
+     E_remove = nuclear::BindEnergyPerNucleonParametrization(target);
+  }
+
+  return E_remove;
+}
+//____________________________________________________________________________
+double FGMBodekRitchie::ProbDensity(double mom, double w, const Target& target,
+  double r) const
+{
+  // Dummy storage for the bin width
+  double dummy_bin_width = 0.;
+  return this->ProbDensity(mom, w, target, r, dummy_bin_width);
+}
+
+//____________________________________________________________________________
+double FGMBodekRitchie::ProbDensity(double mom, double /*w*/,
+  const Target& target, double /*r*/, double& bin_width) const
+{
+  TH1D* prob_distr = this->ProbDistro(target);
+  int bin = prob_distr->FindBin(mom);
+  double prob_density = prob_distr->GetBinContent(bin);
+  // Save the bin_width for possible later use
+  bin_width = prob_distr->GetBinWidth(bin);
+  delete prob_distr;
+  return prob_density;
+}

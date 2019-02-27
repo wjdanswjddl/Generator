@@ -5,7 +5,7 @@
  or see $GENIE/LICENSE
 
  Author: Costas Andreopoulos <costas.andreopoulos \at stfc.ac.uk>
-         University of Liverpool & STFC Rutherford Appleton Lab 
+         University of Liverpool & STFC Rutherford Appleton Lab
 
  For the class documentation see the corresponding header file.
 
@@ -72,7 +72,7 @@ bool SpectralFunc::GenerateNucleon(const Target & target) const
   double dk = kmax - kmin;
   double dw = wmax - wmin;
 
-  LOG("SpectralFunc", pINFO) << "Momentum range = ["   << kmin << ", " << kmax << "]"; 
+  LOG("SpectralFunc", pINFO) << "Momentum range = ["   << kmin << ", " << kmax << "]";
   LOG("SpectralFunc", pINFO) << "Rmv energy range = [" << wmin << ", " << wmax << "]";
 
   RandomGen * rnd = RandomGen::Instance();
@@ -80,7 +80,7 @@ bool SpectralFunc::GenerateNucleon(const Target & target) const
   unsigned int niter = 0;
   while(1) {
     if(niter > kRjMaxIterations) {
-       LOG("SpectralFunc", pWARN) 
+       LOG("SpectralFunc", pWARN)
            << "Couldn't generate a hit nucleon after " << niter << " iterations";
        return false;
     }
@@ -97,7 +97,7 @@ bool SpectralFunc::GenerateNucleon(const Target & target) const
     bool accept = (probg < prob);
     if(!accept) continue;
 
-    LOG("SpectralFunc", pINFO) << "|p,nucleon| = " << kc; 
+    LOG("SpectralFunc", pINFO) << "|p,nucleon| = " << kc;
     LOG("SpectralFunc", pINFO) << "|w,nucleon| = " << wc;
 
     // generate momentum components
@@ -146,7 +146,7 @@ void SpectralFunc::LoadConfig(void)
   LOG("SpectralFunc", pDEBUG) << "Loading Benhar et al. spectral functions";
 
   string data_dir =
-        string(gSystem->Getenv("GENIE")) + 
+        string(gSystem->Getenv("GENIE")) +
         string("/data/evgen/nucl/spectral_functions/");
   string c12file  = data_dir + "benhar-sf-12c.data";
   string fe56file = data_dir + "benhar-sf-56fe.data";
@@ -198,7 +198,7 @@ TGraph2D * SpectralFunc::SelectSpectralFunction(const Target & t) const
   if      (pdgc == kPdgTgtC12)  sf = fSfC12;
   else if (pdgc == kPdgTgtFe56) sf = fSfFe56;
   else {
-    LOG("SpectralFunc", pERROR) 
+    LOG("SpectralFunc", pERROR)
      << "** The spectral function for target " << pdgc << " isn't available";
   }
   if(!sf) {
@@ -207,3 +207,44 @@ TGraph2D * SpectralFunc::SelectSpectralFunction(const Target & t) const
   return sf;
 }
 //____________________________________________________________________________
+double SpectralFunc::MinRemovalEnergy(const Target& t, double) const
+{
+  TGraph2D * sf = this->SelectSpectralFunction( t );
+
+  if ( !sf ) return 0.;
+  else return sf->GetYmin();
+}
+//____________________________________________________________________________
+double SpectralFunc::MaxRemovalEnergy(const Target& t, double) const
+{
+  TGraph2D * sf = this->SelectSpectralFunction( t );
+
+  if ( !sf ) return 0.;
+  else return sf->GetYmax();
+}
+//____________________________________________________________________________
+double SpectralFunc::MinMomentum(const Target& t, double) const
+{
+  TGraph2D * sf = this->SelectSpectralFunction( t );
+
+  if ( !sf ) return 0.;
+  else return sf->GetXmin();
+}
+//____________________________________________________________________________
+double SpectralFunc::MaxMomentum(const Target& t, double) const
+{
+  TGraph2D * sf = this->SelectSpectralFunction( t );
+
+  if ( !sf ) return 0.;
+  else return sf->GetXmax();
+}
+//____________________________________________________________________________
+double SpectralFunc::ProbDensity(double p, double w, const Target & target,
+  double /*r*/) const
+{
+  TGraph2D * sf = this->SelectSpectralFunction(target);
+  // TODO: issue warning?
+  if ( !sf ) return 0.;
+
+  return sf->Interpolate(p,w);
+}

@@ -130,8 +130,7 @@ bool SpectralFunc1d::GenerateNucleon(const Target & target) const
   return true;
 }
 //____________________________________________________________________________
-double SpectralFunc1d::Prob(
-                  double p, double /*w*/, const Target & target) const
+double SpectralFunc1d::Prob(double p, double /*w*/, const Target & target) const
 {
   if(fUseRFGMomentumCutoff) { if(p > fPCutOff) return 0; }
 

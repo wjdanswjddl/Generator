@@ -58,6 +58,17 @@ public:
   void Configure (const Registry & config);
   void Configure (string config);
 
+  // Add "override" specifiers when GENIE moves to C++11
+  // Note that, for this nuclear model, the removal energy is constant
+  virtual double MinRemovalEnergy(const Target& t, double) const /*override*/;
+  virtual double MaxRemovalEnergy(const Target& t, double) const /*override*/;
+
+  virtual double MinMomentum(const Target&, double) const /*override*/;
+  virtual double MaxMomentum(const Target&, double) const /*override*/;
+
+  virtual double ProbDensity(double p, double w, const Target& t, double r = 0.) const
+    /*override*/;
+
 private:
   void LoadConfig(void);
   const NuclearModelI * SelectModel(const Target & t) const;

@@ -52,6 +52,9 @@ public:
   virtual double         Prob            (double p, double w, const Target & tgt,
                                           double hitNucleonRadius) const;
 
+  virtual double         ProbDensity     (double p, double w, const Target & tgt,
+                                          double hitNucleonRadius = 0.) const = 0;
+
   virtual NuclearModel_t ModelType       (const Target &) const = 0;
 
   inline double         RemovalEnergy   (void)           const
@@ -83,6 +86,12 @@ public:
   {
     fCurrRemovalEnergy = E;
   }
+
+  virtual double MinMomentum(const Target& t, double r = 0.0) const = 0;
+  virtual double MaxMomentum(const Target& t, double r = 0.0) const = 0;
+
+  virtual double MinRemovalEnergy(const Target& t, double r = 0.0) const = 0;
+  virtual double MaxRemovalEnergy(const Target& t, double r = 0.0) const = 0;
 
 protected:
   NuclearModelI()

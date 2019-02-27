@@ -3,10 +3,10 @@
 
 \class    genie::FGMBodekRitchie
 
-\brief    The Bodek Richie Fermi Gass model. Implements the NuclearModelI 
+\brief    The Bodek Richie Fermi Gass model. Implements the NuclearModelI
           interface.
 
-\ref      
+\ref
 
 \author   Costas Andreopoulos <costas.andreopoulos \at stfc.ac.uk>
           University of Liverpool & STFC Rutherford Appleton Lab
@@ -45,9 +45,9 @@ public:
   //-- implement the NuclearModelI interface
   bool           GenerateNucleon (const Target & t) const;
   double         Prob            (double mom, double w, const Target & t) const;
-  NuclearModel_t ModelType       (const Target &) const 
-  { 
-    return kNucmFermiGas; 
+  NuclearModel_t ModelType       (const Target &) const
+  {
+    return kNucmFermiGas;
   }
 
   //-- override the Algorithm::Configure methods to load configuration
@@ -55,8 +55,29 @@ public:
   void Configure (const Registry & config);
   void Configure (string param_set);
 
+  // Add "override" specifiers when GENIE moves to C++11
+  // Note that, for this nuclear model, the removal energy is constant
+  inline virtual double MinRemovalEnergy(const Target& t, double) const /*override*/
+    { return GetRemovalEnergy(t); }
+  inline virtual double MaxRemovalEnergy(const Target& t, double) const /*override*/
+    { return GetRemovalEnergy(t); }
+
+  inline virtual double MinMomentum(const Target&, double) const /*override*/
+    { return 0.; }
+  inline virtual double MaxMomentum(const Target&, double) const /*override*/
+    { return fPMax; }
+
+  double ProbDensity(double mom, double w, const Target& t, double r = 0.) const /*override*/;
+
 private:
   void   LoadConfig (void);
+  double GetRemovalEnergy (const Target& t) const;
+
+  /// Helper private version of ProbDensity that also retrieves the width of
+  /// the relevant bin
+  double ProbDensity(double mom, double w, const Target& target,
+    double r, double& bin_width) const;
+
   TH1D * ProbDistro (const Target & t) const;
 
   mutable map<string, TH1D *> fProbDistroMap;

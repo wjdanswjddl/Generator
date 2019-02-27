@@ -40,8 +40,12 @@ public:
 
   //-- implement the NuclearModelI interface
   bool           GenerateNucleon (const Target & t) const;
+
+  // TODO: Right now, SpectralFunc::Prob() appears to return the
+  // probability *density*, not the probability. Think about changing the
+  // behavior if doing so makes sense.
   double         Prob            (double p, double w, const Target & t) const;
-  NuclearModel_t ModelType       (const Target &) const 
+  NuclearModel_t ModelType       (const Target &) const
   {
     return kNucmSpectralFunc;
   }
@@ -51,10 +55,21 @@ public:
   void Configure (const Registry & config);
   void Configure (string config);
 
+  // Add "override" specifiers when GENIE moves to C++11
+  // Note that, for this nuclear model, the removal energy is constant
+  virtual double MinRemovalEnergy(const Target& t, double) const /*override*/;
+  virtual double MaxRemovalEnergy(const Target& t, double) const /*override*/;
+
+  virtual double MinMomentum(const Target&, double) const /*override*/;
+  virtual double MaxMomentum(const Target&, double) const /*override*/;
+
+  virtual double ProbDensity(double p, double w, const Target & t, double r = 0.)
+    const /*override*/;
+
 private:
   void       LoadConfig             (void);
   TGraph2D * Convert2Graph          (TNtupleD & data) const;
-  TGraph2D * SelectSpectralFunction (const Target & target) const; 
+  TGraph2D * SelectSpectralFunction (const Target & target) const;
 
   TGraph2D * fSfFe56;   ///< Benhar's Fe56 SF
   TGraph2D * fSfC12;    ///< Benhar's C12 SF

@@ -88,10 +88,6 @@ private:
   double fEnergyCutOff;                ///< Average only for energies below this cutoff defining
                                        ///< the region where nuclear modeling details do matter
 
-  /// Number of nucleons to sample when computing the average total cross
-  /// section in Integral()
-  int fIntegralNumNucleonThrows;
-
   /// Enum specifying the method to use when calculating the binding energy of
   /// the initial hit nucleon
   QELEvGen_BindingMode_t fIntegralNucleonBindingMode;

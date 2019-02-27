@@ -84,26 +84,19 @@ bool LocalFGM::GenerateNucleon(const Target & target,
   fCurrMomentum.SetXYZ(px,py,pz);
 
   //-- set removal energy
-  //
-  int Z = target.Z();
-  map<int,double>::const_iterator it = fNucRmvE.find(Z);
-  if(it != fNucRmvE.end()) fCurrRemovalEnergy = it->second;
-  else fCurrRemovalEnergy = nuclear::BindEnergyPerNucleon(target);
+  fCurrRemovalEnergy = GetRemovalEnergy( target );
 
   return true;
 }
 //____________________________________________________________________________
 double LocalFGM::Prob(double p, double w, const Target & target,
-			     double hitNucleonRadius) const
+  double hitNucleonRadius) const
 {
-  if(w<0) {
-    TH1D * prob = this->ProbDistro(target, hitNucleonRadius);
-    int bin = prob->FindBin(p);
-    double y  = prob->GetBinContent(bin);
-    double dx = prob->GetBinWidth(bin);
-    double pr  = y*dx;
-    delete prob;
-    return pr;
+  if ( w < 0 ) {
+    double bin_width = 0.;
+    double prob_density = this->ProbDensity(p, w, target, hitNucleonRadius, bin_width);
+    double prob = prob_density * bin_width;
+    return prob;
   }
   return 1;
 }
@@ -219,3 +212,32 @@ void LocalFGM::LoadConfig(void)
   }
 }
 //____________________________________________________________________________
+double LocalFGM::GetRemovalEnergy(const Target& target) const {
+  double E_remove = 0.;
+  int Z = target.Z();
+  map<int,double>::const_iterator it = fNucRmvE.find(Z);
+  if ( it != fNucRmvE.end() ) E_remove = it->second;
+  else E_remove = nuclear::BindEnergyPerNucleon(target);
+  return E_remove;
+}
+//____________________________________________________________________________
+double LocalFGM::ProbDensity(double mom, double w, const Target& target,
+  double r) const
+{
+  // Dummy storage for the bin width
+  double dummy_bin_width = 0.;
+  return this->ProbDensity(mom, w, target, r, dummy_bin_width);
+}
+
+//____________________________________________________________________________
+double LocalFGM::ProbDensity(double mom, double /*w*/,
+  const Target& target, double r, double& bin_width) const
+{
+  TH1D* prob_distr = this->ProbDistro(target, r);
+  int bin = prob_distr->FindBin(mom);
+  double prob_density = prob_distr->GetBinContent(bin);
+  // Save the bin_width for possible later use
+  bin_width = prob_distr->GetBinWidth(bin);
+  delete prob_distr;
+  return prob_density;
+}

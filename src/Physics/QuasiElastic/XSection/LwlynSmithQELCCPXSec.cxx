@@ -303,72 +303,7 @@ double LwlynSmithQELCCPXSec::FullDifferentialXSec(const Interaction *  interacti
 //____________________________________________________________________________
 double LwlynSmithQELCCPXSec::Integral(const Interaction * in) const
 {
-  bool nuclear_target = in->InitState().Tgt().IsNucleus();
-  if(!nuclear_target || !fDoAvgOverNucleonMomentum) {
-    return fXSecIntegrator->Integrate(this,in);
-  }
-
-  double E = in->InitState().ProbeE(kRfHitNucRest);
-  if(fLFG || E < fEnergyCutOff) {
-    // clone the input interaction so as to tweak the
-    // hit nucleon 4-momentum in the averaging loop
-    Interaction in_curr(*in);
-
-    // hit target
-    Target * tgt = in_curr.InitState().TgtPtr();
-
-    // get nuclear masses (init & final state nucleus)
-    int nucleon_pdgc = tgt->HitNucPdg();
-    bool is_p = pdg::IsProton(nucleon_pdgc);
-    int Zi = tgt->Z();
-    int Ai = tgt->A();
-    int Zf = (is_p) ? Zi-1 : Zi;
-    int Af = Ai-1;
-    PDGLibrary * pdglib = PDGLibrary::Instance();
-    TParticlePDG * nucl_i = pdglib->Find( pdg::IonPdgCode(Ai, Zi) );
-    TParticlePDG * nucl_f = pdglib->Find( pdg::IonPdgCode(Af, Zf) );
-    if(!nucl_f) {
-      LOG("LwlynSmith", pFATAL)
-	<< "Unknwown nuclear target! No target with code: "
-	<< pdg::IonPdgCode(Af, Zf) << " in PDGLibrary!";
-      exit(1);
-    }
-    double Mi  = nucl_i -> Mass(); // initial nucleus mass
-    double Mf  = nucl_f -> Mass(); // remnant nucleus mass
-
-    // throw nucleons with fermi momenta and binding energies
-    // generated according to the current nuclear model for the
-    // input target and average the cross section
-    double xsec_sum = 0.;
-    const int nnuc = 2000;
-    // VertexGenerator for generating a position before generating
-    // each nucleon
-    VertexGenerator * vg = new VertexGenerator();
-    vg->Configure("Default");
-    for(int inuc=0;inuc<nnuc;inuc++){
-      // Generate a position in the nucleus
-      TVector3 nucpos = vg->GenerateVertex(&in_curr,tgt->A());
-      tgt->SetHitNucPosition(nucpos.Mag());
-
-      // Generate a nucleon
-      fNuclModel->GenerateNucleon(*tgt, nucpos.Mag());
-      TVector3 p3N = fNuclModel->Momentum3();
-      double   EN  = Mi - TMath::Sqrt(p3N.Mag2() + Mf*Mf);
-      TLorentzVector* p4N = tgt->HitNucP4Ptr();
-      p4N->SetPx (p3N.Px());
-      p4N->SetPy (p3N.Py());
-      p4N->SetPz (p3N.Pz());
-      p4N->SetE  (EN);
-
-      double xsec = fXSecIntegrator->Integrate(this,&in_curr);
-      xsec_sum += xsec;
-    }
-    double xsec_avg = xsec_sum / nnuc;
-    delete vg;
-    return xsec_avg;
-  }else{
-    return fXSecIntegrator->Integrate(this,in);
-  }
+  return fXSecIntegrator->Integrate(this, in);
 }
 //____________________________________________________________________________
 bool LwlynSmithQELCCPXSec::ValidProcess(const Interaction * interaction) const
@@ -431,17 +366,8 @@ void LwlynSmithQELCCPXSec::LoadConfig(void)
   fNuclModel = dynamic_cast<const NuclearModelI *> (this->SubAlg(nuclkey));
   assert(fNuclModel);
 
-  fLFG = fNuclModel->ModelType(Target()) == kNucmLocalFermiGas;
-
-  bool average_over_nuc_mom ;
-  GetParamDef( "IntegralAverageOverNucleonMomentum", average_over_nuc_mom, false ) ;
-  // Always average over initial nucleons if the nuclear model is LFG
-  fDoAvgOverNucleonMomentum = fLFG || average_over_nuc_mom ;
-
-  fEnergyCutOff = 0.;
-
-  if(fDoAvgOverNucleonMomentum) {
-    // Get averaging cutoff energy
-	  GetParamDef("IntegralNuclearInfluenceCutoffEnergy", fEnergyCutOff, 2.0 ) ;
-  }
+  // Method to use to calculate the binding energy of the initial hit nucleon
+  std::string temp_binding_mode;
+  GetParamDef( "IntegralNucleonBindingMode", temp_binding_mode, std::string("UseNuclearModel") );
+  fIntegralNucleonBindingMode = genie::utils::StringToQELBindingMode( temp_binding_mode );
 }

@@ -81,22 +81,22 @@ double QELXSec::Integrate(
   }
   Range1D_t rQ2 = kps.Limits(kKVQ2);
   if(rQ2.min<0 || rQ2.max<0) return 0;
-  LOG("QELXSec", pDEBUG) 
+  LOG("QELXSec", pDEBUG)
           << "Q2 integration range = (" << rQ2.min << ", " << rQ2.max << ")";
 
   Interaction * interaction = new Interaction(*in);
   interaction->SetBit(kISkipProcessChk);
   interaction->SetBit(kISkipKinematicChk);
 
-  ROOT::Math::IBaseFunctionOneDim * func = new 
+  ROOT::Math::IBaseFunctionOneDim * func = new
       utils::gsl::dXSec_dQ2_E(model, interaction);
-  ROOT::Math::IntegrationOneDim::Type ig_type = 
+  ROOT::Math::IntegrationOneDim::Type ig_type =
       utils::gsl::Integration1DimTypeFromString(fGSLIntgType);
-  
+
   double abstol = 0; //We mostly care about relative tolerance
   ROOT::Math::Integrator ig(*func,ig_type,abstol,fGSLRelTol,fGSLMaxSizeOfSubintervals, fGSLRule);
   double xsec = ig.Integral(rQ2.min, rQ2.max) * (1E-38 * units::cm2);
-     
+
   //LOG("QELXSec", pDEBUG) << "XSec[QEL] (E = " << E << ") = " << xsec;
 
   delete func;
