@@ -228,7 +228,7 @@ void QELEventGenerator::ProcessEventRecord(GHepRecord * evrec) const
 
             // Apply binding energy corrections after sampling kinematics if the
             // binding mode was set to "OnShellWithCorrection"
-            if ( fHitNucleonBindingMode == kOnShellWithCorrection ) {
+            if ( tgt->IsNucleus() && fHitNucleonBindingMode == kOnShellWithCorrection ) {
               // Initial and final nucleon energies sampled assuming that the
               // hit nucleon was unbound
               double ENi_on_shell = tgt->HitNucP4().E();
@@ -236,8 +236,7 @@ void QELEventGenerator::ProcessEventRecord(GHepRecord * evrec) const
               // Pretend that the hit nucleon was off-shell to begin with.
               // Note that this function call updates the stored value of fEb.
               // TODO: consider adding an option to use kUseGroundStateRemnant here
-              genie::utils::BindHitNucleon(*interaction, *fNuclModel,
-                fEb, kUseNuclearModel);
+              genie::utils::BindHitNucleon(*interaction, *fNuclModel, fEb, kUseNuclearModel);
 
               // Get the bound nucleon's total energy
               double ENi = tgt->HitNucP4().E();
