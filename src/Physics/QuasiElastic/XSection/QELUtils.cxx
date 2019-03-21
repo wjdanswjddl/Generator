@@ -198,6 +198,9 @@ genie::QELEvGen_BindingMode_t genie::utils::StringToQELBindingMode(
   else if ( binding_mode == "OnShell" ) {
     return kOnShell;
   }
+  else if ( binding_mode == "OnShellWithCorrection" ) {
+    return kOnShellWithCorrection;
+  }
   else {
     LOG("QELEvent", pFATAL) << "Unrecognized setting \"" << binding_mode
       << "\" requested in genie::utils::StringToQELBindingMode()";
@@ -273,7 +276,9 @@ void genie::utils::BindHitNucleon(genie::Interaction& interaction,
   // the selected binding energy mode. Always put the initial nucleon
   // on shell if it is not part of a composite nucleus
   double ENi = 0.;
-  if ( tgt->IsNucleus() && hitNucleonBindingMode != genie::kOnShell ) {
+  if ( tgt->IsNucleus() && (hitNucleonBindingMode == genie::kUseNuclearModel
+    || hitNucleonBindingMode == genie::kUseGroundStateRemnant) )
+  {
     // Initial nucleus mass
     double Mi = tgt->Mass();
 
@@ -311,8 +316,8 @@ void genie::utils::BindHitNucleon(genie::Interaction& interaction,
     ENi = Mi - std::sqrt( Mf*Mf + p3Ni.Mag2() );
   }
   else {
-    // Keep the struck nucleon on shell either because
-    // hitNucleonBindingMode == kOnShell or because
+    // Keep the struck nucleon on shell either because hitNucleonBindingMode ==
+    // kOnShell, hitNucleonBindingMode == kOnShellWithCorrection, or because
     // the target is a single nucleon
     ENi = std::sqrt( p3Ni.Mag2() + std::pow(mNi, 2) );
     Eb = 0.;

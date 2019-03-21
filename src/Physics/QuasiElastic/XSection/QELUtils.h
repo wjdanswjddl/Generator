@@ -24,7 +24,12 @@ namespace genie {
     kUseGroundStateRemnant,
 
     // Leave the struck nucleon on shell, effectively ignoring its binding energy
-    kOnShell
+    kOnShell,
+
+    // Leave the struck nucleon on shell, then correct nucleon and lepton outgoing
+    // energies after sampling kinematics
+    kOnShellWithCorrection
+
   } QELEvGen_BindingMode_t;
 
   namespace utils {

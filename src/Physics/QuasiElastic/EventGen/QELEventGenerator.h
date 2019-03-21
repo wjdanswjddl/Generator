@@ -68,6 +68,10 @@ private:
   /// momentum to use in ComputeMaxXSec()
   int fMaxXSecNucleonThrows;
 
+  /// Algorithm ID for accessing the PauliBlocker (used only when
+  /// HitNucleonBindingMode is set to kOnShellWithCorrection)
+  AlgId fPauliBlockerID;
+
 }; // class definition
 
 } // genie namespace

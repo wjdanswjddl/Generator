@@ -48,6 +48,7 @@
 #include "Framework/ParticleData/PDGUtils.h"
 #include "Framework/ParticleData/PDGCodes.h"
 #include "Physics/QuasiElastic/EventGen/QELEventGenerator.h"
+#include "Physics/NuclearState/PauliBlocker.h"
 
 #include "Physics/NuclearState/NuclearModelI.h"
 #include "Framework/Numerical/MathUtils.h"
@@ -223,7 +224,98 @@ void QELEventGenerator::ProcessEventRecord(GHepRecord * evrec) const
         accept = (t < xsec);
 
         // If the generated kinematics are accepted, finish-up module's job
-        if(accept) {
+        if ( accept ) {
+
+            // Apply binding energy corrections after sampling kinematics if the
+            // binding mode was set to "OnShellWithCorrection"
+            if ( fHitNucleonBindingMode == kOnShellWithCorrection ) {
+              // Initial and final nucleon energies sampled assuming that the
+              // hit nucleon was unbound
+              double ENi_on_shell = tgt->HitNucP4().E();
+
+              // Pretend that the hit nucleon was off-shell to begin with.
+              // Note that this function call updates the stored value of fEb.
+              // TODO: consider adding an option to use kUseGroundStateRemnant here
+              genie::utils::BindHitNucleon(*interaction, *fNuclModel,
+                fEb, kUseNuclearModel);
+
+              // Get the bound nucleon's total energy
+              double ENi = tgt->HitNucP4().E();
+              // Energy needed to put the inital nucleon on-shell
+              double epsilon_B = ENi_on_shell - ENi;
+
+              // Correct the energy and 3-momentum (magnitude only) for the
+              // outgoing lepton
+              double ml = interaction->FSPrimLepton()->Mass();
+              double El_on_shell = interaction->Kine().FSLeptonP4().E();
+              double El_corrected = El_on_shell - epsilon_B;
+              double pl_corrected = std::sqrt( std::max(0., El_corrected*El_corrected - ml*ml) );
+
+              // Correct the outgoing lepton's 3-momentum (magnitude only)
+              TLorentzVector p4l = interaction->Kine().FSLeptonP4();
+              TVector3 p3l = p4l.Vect();
+              p3l *= pl_corrected / p3l.Mag();
+
+              // Get the probe 4-momentum
+              TLorentzVector* p4nu_temp = interaction->InitState().GetProbeP4( kRfLab );
+              TLorentzVector p4nu = *p4nu_temp;
+              delete p4nu_temp;
+
+              // Compute the corrected value of Q2
+              TLorentzVector p4l_corrected(p3l.X(), p3l.Y(), p3l.Z(), El_corrected);
+              TLorentzVector q = p4nu - p4l_corrected;
+              double Q2 = -q.M2();
+
+              // Get the corrected final nucleon 4-momentum via conservation
+              TLorentzVector p4Ni = tgt->HitNucP4();
+              double mNf = interaction->RecoilNucleon()->Mass();
+              TVector3 p3Nf = p4nu.Vect() + p4Ni.Vect() - p3l;
+              double ENf_corrected = std::sqrt(p3Nf.Mag2() + mNf*mNf);
+
+              // Get the allowed the Q2 range.
+              Range1D_t Q2lim = interaction->PhaseSpace().Q2Lim();
+
+              // If the binding energy corrections pull us into an unphysical
+              // region (exactly at or below threshold, outside the Q2 limits),
+              // then reject the sampled kinematics
+              if ( El_corrected <= ml || pl_corrected <= 0.) {
+                LOG("QELEvent", pDEBUG) << "Rejecting current throw, binding energy"
+                 << " corrections move event below threshold";
+                continue;
+              }
+              else if ( Q2 < Q2lim.min || Q2 > Q2lim.max ) {
+                LOG("QELEvent", pDEBUG) << "Rejecting current throw, binding energy"
+                 << " corrections move event outside allowed Q2 range";
+                continue;
+              }
+
+              // Check Pauli blocking. If the unbound kinematics would be unblocked but the bound
+              // kinematics would be blocked, then shut PauliBlocker off just for this event.
+              AlgFactory* algf = AlgFactory::Instance();
+              const PauliBlocker* pblock = dynamic_cast<const PauliBlocker*>(
+                algf->GetAlgorithm(fPauliBlockerID) );
+              assert( pblock );
+
+              double kF = pblock->GetFermiMomentum(*tgt, interaction->RecoilNucleonPdg(),
+                tgt->HitNucPosition());
+
+              double pNf_uncorrected = interaction->Kine().HadSystP4().P();
+
+              if ( p3Nf.Mag() < kF &&  pNf_uncorrected >= kF ) {
+                // Bound kinematics are blocked, but unbound ones are not. Ignore Pauli
+                // blocking in this case to avoid problems with our approximate binding energy
+                // corrections
+                pblock->SetIgnoreNext();
+              }
+
+              // Update the interaction summary with the corrected final particle 4-momenta
+              interaction->KinePtr()->SetFSLeptonP4( p4l_corrected );
+              interaction->KinePtr()->SetHadSystP4(p3Nf.X(), p3Nf.Y(), p3Nf.Z(), ENf_corrected);
+
+              // Also update the stored value of Q2
+              interaction->KinePtr()->SetQ2( Q2 );
+            }
+
             double gQ2 = interaction->KinePtr()->Q2(false);
             LOG("QELEvent", pINFO) << "*Selected* Q^2 = " << gQ2 << " GeV^2";
 
@@ -417,6 +509,10 @@ void QELEventGenerator::LoadConfig(void)
     fHitNucleonBindingMode = genie::utils::StringToQELBindingMode( binding_mode );
 
     GetParamDef( "MaxXSecNucleonThrows", fMaxXSecNucleonThrows, 800 );
+
+   RgAlg pauliBlockID;
+   GetParamDef( "PauliBlockerAlg", pauliBlockID, RgAlg("genie::PauliBlocker", "Default") );
+   fPauliBlockerID = AlgId( pauliBlockID );
 }
 //____________________________________________________________________________
 double QELEventGenerator::ComputeMaxXSec(const Interaction * in) const
