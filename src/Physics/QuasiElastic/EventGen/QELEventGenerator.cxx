@@ -229,60 +229,96 @@ void QELEventGenerator::ProcessEventRecord(GHepRecord * evrec) const
             // Apply binding energy corrections after sampling kinematics if the
             // binding mode was set to "OnShellWithCorrection"
             if ( tgt->IsNucleus() && fHitNucleonBindingMode == kOnShellWithCorrection ) {
-              // Initial and final nucleon energies sampled assuming that the
-              // hit nucleon was unbound
-              double ENi_on_shell = tgt->HitNucP4().E();
 
               // Pretend that the hit nucleon was off-shell to begin with.
-              // Note that this function call updates the stored value of fEb.
+              // Note that this function call updates the stored value of fEb
+              // and the initial nucleon 4-momentum in the interaction.
               // TODO: consider adding an option to use kUseGroundStateRemnant here
               genie::utils::BindHitNucleon(*interaction, *fNuclModel, fEb, kUseNuclearModel);
 
-              // Get the bound nucleon's total energy
-              double ENi = tgt->HitNucP4().E();
-              // Energy needed to put the inital nucleon on-shell
-              double epsilon_B = ENi_on_shell - ENi;
-
-              // Correct the energy and 3-momentum (magnitude only) for the
-              // outgoing lepton
-              double ml = interaction->FSPrimLepton()->Mass();
-              double El_on_shell = interaction->Kine().FSLeptonP4().E();
-              double El_corrected = El_on_shell - epsilon_B;
-              double pl_corrected = std::sqrt( std::max(0., El_corrected*El_corrected - ml*ml) );
-
-              // Correct the outgoing lepton's 3-momentum (magnitude only)
-              TLorentzVector p4l = interaction->Kine().FSLeptonP4();
-              TVector3 p3l = p4l.Vect();
-              p3l *= pl_corrected / p3l.Mag();
-
-              // Get the probe 4-momentum
-              TLorentzVector* p4nu_temp = interaction->InitState().GetProbeP4( kRfLab );
-              TLorentzVector p4nu = *p4nu_temp;
-              delete p4nu_temp;
-
-              // Compute the corrected value of Q2
-              TLorentzVector p4l_corrected(p3l.X(), p3l.Y(), p3l.Z(), El_corrected);
-              TLorentzVector q = p4nu - p4l_corrected;
-              double Q2 = -q.M2();
-
-              // Get the corrected final nucleon 4-momentum via conservation
-              TLorentzVector p4Ni = tgt->HitNucP4();
+              // TODO: reduce code duplication with genie::utils::ComputeFullQELPXSec
+              // Mass of the outgoing lepton
+              double lepMass = interaction->FSPrimLepton()->Mass();
+              // Look up the (on-shell) mass of the final nucleon
               double mNf = interaction->RecoilNucleon()->Mass();
-              TVector3 p3Nf = p4nu.Vect() + p4Ni.Vect() - p3l;
-              double ENf_corrected = std::sqrt(p3Nf.Mag2() + mNf*mNf);
 
-              // Get the allowed the Q2 range.
-              Range1D_t Q2lim = interaction->PhaseSpace().Q2Lim();
+              // Mandelstam s for the probe/hit nucleon system
+              double s = std::pow( interaction->InitState().CMEnergy(), 2 );
 
-              // If the binding energy corrections pull us into an unphysical
-              // region (exactly at or below threshold, outside the Q2 limits),
-              // then reject the sampled kinematics
-              if ( El_corrected <= ml || pl_corrected <= 0.) {
+              // If binding energy effects pull us below threshold, reject the
+              // current event and try again.
+              if ( std::sqrt(s) < lepMass + mNf ) {
                 LOG("QELEvent", pDEBUG) << "Rejecting current throw, binding energy"
                  << " corrections move event below threshold";
                 continue;
               }
-              else if ( Q2 < Q2lim.min || Q2 > Q2lim.max ) {
+
+              double outLeptonEnergy = ( s - mNf*mNf + lepMass*lepMass ) / (2 * std::sqrt(s));
+
+              if (outLeptonEnergy*outLeptonEnergy - lepMass*lepMass < 0.) {
+                LOG("QELEvent", pDEBUG) << "Rejecting current throw, binding energy"
+                 << " corrections move event below threshold";
+                continue;
+              }
+
+              double outMomentum = TMath::Sqrt(outLeptonEnergy*outLeptonEnergy - lepMass*lepMass);
+
+              // Compute the boost vector for moving from the COM frame to the
+              // lab frame, i.e., the velocity of the COM frame as measured
+              // in the lab frame.
+              TLorentzVector* p4nu_temp = interaction->InitState().GetProbeP4( kRfLab );
+              TLorentzVector p4nu = *p4nu_temp;
+              delete p4nu_temp;
+              const TLorentzVector& p4Ni = interaction->InitState().Tgt().HitNucP4();
+              TLorentzVector p4tot = p4nu + p4Ni;
+              TVector3 beta = p4tot.BoostVector();
+
+              // FullDifferentialXSec depends on theta_0 and phi_0, the lepton COM
+              // frame angles with respect to the direction of the COM frame velocity
+              // as measured in the lab frame. To generate the correct dependence
+              // here, first set the lepton COM frame angles with respect to +z
+              // (via TVector3::SetTheta() and TVector3::SetPhi()).
+              TVector3 lepton3Mom(0., 0., outMomentum);
+              lepton3Mom.SetTheta( TMath::ACos(costheta) );
+              lepton3Mom.SetPhi( phi );
+
+              // Then rotate the lepton 3-momentum so that the old +z direction now
+              // points along the COM frame velocity (beta)
+              TVector3 zvec(0., 0., 1.);
+              TVector3 rot = ( zvec.Cross(beta) ).Unit();
+              double angle = beta.Angle( zvec );
+              // Rotate if the rotation vector is not 0
+              if ( rot.Mag() >= genie::controls::kASmallNum ) {
+                lepton3Mom.Rotate(angle, rot);
+              }
+
+              // Construct the lepton 4-momentum in the COM frame
+              TLorentzVector lepton(lepton3Mom, outLeptonEnergy);
+
+              // The final state nucleon will have an equal and opposite 3-momentum
+              // in the COM frame and will be on the mass shell
+              TLorentzVector outNucleon(-1*lepton.Px(),-1*lepton.Py(),-1*lepton.Pz(),
+                TMath::Sqrt(outMomentum*outMomentum + mNf*mNf));
+
+              // Boost the 4-momenta for both particles into the lab frame
+              lepton.Boost(beta);
+              outNucleon.Boost(beta);
+
+              // TODO: add logging message for this
+              // Check if event is at a low angle - if so return 0 and stop wasting time
+              if (180 * lepton.Theta() / genie::constants::kPi < fMinAngleEM
+                && interaction->ProcInfo().IsEM())
+              {
+                continue;
+              }
+
+              TLorentzVector qP4 = p4nu - lepton;
+              double Q2 = -1. * qP4.M2();
+
+              // Check the Q2 range. If binding energy corrections pull us outside of it,
+              // reject this event and try again.
+              Range1D_t Q2lim = interaction->PhaseSpace().Q2Lim();
+              if (Q2 < Q2lim.min || Q2 > Q2lim.max) {
                 LOG("QELEvent", pDEBUG) << "Rejecting current throw, binding energy"
                  << " corrections move event outside allowed Q2 range";
                 continue;
@@ -300,19 +336,18 @@ void QELEventGenerator::ProcessEventRecord(GHepRecord * evrec) const
 
               double pNf_uncorrected = interaction->Kine().HadSystP4().P();
 
-              if ( p3Nf.Mag() < kF &&  pNf_uncorrected >= kF ) {
+              if ( outNucleon.P() < kF &&  pNf_uncorrected >= kF ) {
                 // Bound kinematics are blocked, but unbound ones are not. Ignore Pauli
                 // blocking in this case to avoid problems with our approximate binding energy
                 // corrections
                 pblock->SetIgnoreNext();
               }
 
-              // Update the interaction summary with the corrected final particle 4-momenta
-              interaction->KinePtr()->SetFSLeptonP4( p4l_corrected );
-              interaction->KinePtr()->SetHadSystP4(p3Nf.X(), p3Nf.Y(), p3Nf.Z(), ENf_corrected);
-
-              // Also update the stored value of Q2
+              // Update the interaction with the corrected 4-momenta and Q2
+              interaction->KinePtr()->SetFSLeptonP4( lepton );
+              interaction->KinePtr()->SetHadSystP4( outNucleon );
               interaction->KinePtr()->SetQ2( Q2 );
+
             }
 
             double gQ2 = interaction->KinePtr()->Q2(false);
