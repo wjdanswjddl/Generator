@@ -52,16 +52,12 @@ public :
   double GetFermiMomentum(const Target& tgt, int pdg_Nf,
     double radius = 0.0) const;
 
-  void SetIgnoreNext() const;
-
 private:
    void LoadModelType(void);
 
    bool fLFG;
    const FermiMomentumTable * fKFTable;
    string fKFTableName;
-
-   mutable bool fIgnoreNext;
 };
 
 }      // genie namespace

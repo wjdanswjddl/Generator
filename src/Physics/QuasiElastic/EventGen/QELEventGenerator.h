@@ -64,6 +64,10 @@ private:
   /// energy of the struck nucleon
   QELEvGen_BindingMode_t fHitNucleonBindingMode;
 
+  /// Factor to use when applying corrections with the OnShellWithCorrection
+  /// hit nucleon binding mode
+  double fBindingEnergyCorrectionFactor;
+
   /// The number of nucleons to sample from the nuclear model when choosing a maximum
   /// momentum to use in ComputeMaxXSec()
   int fMaxXSecNucleonThrows;

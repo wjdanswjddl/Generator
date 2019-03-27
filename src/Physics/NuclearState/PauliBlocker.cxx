@@ -44,7 +44,7 @@ using namespace genie::constants;
 
 //___________________________________________________________________________
 PauliBlocker::PauliBlocker() :
-EventRecordVisitorI("genie::PauliBlocker"), fIgnoreNext( false )
+EventRecordVisitorI("genie::PauliBlocker")
 {
 
 }
@@ -62,13 +62,6 @@ PauliBlocker::~PauliBlocker()
 //___________________________________________________________________________
 void PauliBlocker::ProcessEventRecord(GHepRecord * evrec) const
 {
-  if ( fIgnoreNext ) {
-    LOG("PauliBlock", pDEBUG) << "Pauli blocking was disabled for this event";
-    fIgnoreNext = false;
-    return;
-  }
-
-
   // Return if the neutrino was not scatterred off a nuclear target
   GHepParticle * nucltgt = evrec->TargetNucleus();
   if (!nucltgt) {
@@ -191,8 +184,4 @@ double PauliBlocker::GetFermiMomentum(const Target& tgt, int pdg_Nf,
   }
 
   return kF;
-}
-//___________________________________________________________________________
-void PauliBlocker::SetIgnoreNext() const {
-  fIgnoreNext = true;
 }
