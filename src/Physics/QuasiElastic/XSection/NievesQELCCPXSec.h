@@ -136,14 +136,16 @@ private:
   //are equal
   int leviCivita(int input[]) const;
 
-  double LmunuAnumu(const TLorentzVector neutrinoMom,
-		    const TLorentzVector inNucleonMom,
-		    const TLorentzVector leptonMom,
-		    const TLorentzVector outNucleonMom,
-		    double M, double r, bool is_neutrino,
-		    bool tgtIsNucleus,
-		    int tgt_pdgc, int A, int Z, int N,
-		    bool hitNucIsProton) const;
+  double LmunuAnumu(const TLorentzVector& neutrinoMom,
+    const TLorentzVector& inNucleonMom,
+    const TLorentzVector& leptonMom,
+    const TLorentzVector& outNucleonMom,
+    bool is_neutrino, const Target& target,
+    bool use_average_tensor, double& ENiOnShellAverage) const;
+
+  double CoulombFactor(const Target& target,
+    const TLorentzVector& leptonMom, double ml, bool is_neutrino,
+    double& plLocal) const;
 
   // NOTE: THE FOLLOWING CODE IS FOR TESTING PURPOSES ONLY
   // Used to print tensor elements and various inputs for comparison to Nieves'
