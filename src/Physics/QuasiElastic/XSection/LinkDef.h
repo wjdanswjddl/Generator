@@ -38,5 +38,6 @@
 
 #pragma link C++ class genie::QELXSec;
 #pragma link C++ class genie::NewQELXSec;
+#pragma link C++ class genie::NievesQELCCXSec;
 
 #endif

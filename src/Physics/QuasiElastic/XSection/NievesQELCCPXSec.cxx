@@ -198,7 +198,7 @@ double NievesQELCCPXSec::XSec(const Interaction* interaction,
     // The initial nucleon 4-momentum isn't actually used in this
     // phase space (average values of the nucleon tensor
     // elements are used instead), so just make a dummy 4-vector
-    inNucleonMomOnShell = TLorentzVector(0., 0., 0., 0.);
+    inNucleonMomOnShell = TLorentzVector(0., 0., 0., mNi);
   }
   else {
     // kps == kPSQELEvGen
@@ -253,18 +253,6 @@ double NievesQELCCPXSec::XSec(const Interaction* interaction,
   TVector3 leptonMomCoulomb3 = ( !fCoulomb ) ? leptonMom3
     : plLocal * leptonMom3.Unit();
   TVector3 q3VecTilde = neutrinoMom3 - leptonMomCoulomb3;
-
-  if ( kps == kPSTlctl ) {
-    // Handle an extra theta function (not included in ImU) needed
-    // for the averaged nucleon tensor
-    double q3Tilde = q3VecTilde.Mag();
-    double q2Tilde = q0Tilde*q0Tilde - q3Tilde*q3Tilde;
-    double M2 = std::pow(kNucleonMass, 2);
-    double a = ( -q0Tilde + q3Tilde*TMath::Sqrt(1. - 4.*M2 / q2Tilde) ) / 2.;
-    double epsRP = TMath::Max(TMath::Max(kNucleonMass, EF_Nf - q0Tilde), a);
-    if ( EF_Ni >= epsRP ) return 0.;
-    // TODO: check
-  }
 
   // Find the rotation angle needed to put q3VecTilde along z
   TVector3 zvec(0.0, 0.0, 1.0);
@@ -326,7 +314,7 @@ double NievesQELCCPXSec::XSec(const Interaction* interaction,
 
   // In the kPSTlctl phase space, we use nucleon tensor elements that are
   // averaged over the nucleon momentum distribution (local Fermi gas model)
-  bool use_average_tensor = (kps == kPSTlctl);
+  bool use_average_tensor = ( kps == kPSTlctl && target.IsNucleus() );
   double ENiOnShellAverage = 0.;
   double LmunuAnumuResult = LmunuAnumu(neutrinoMom, inNucleonMomOnShell,
     leptonMom, qTildeP4, is_neutrino, target, use_average_tensor,
@@ -343,7 +331,7 @@ double NievesQELCCPXSec::XSec(const Interaction* interaction,
   }
   else {
     // kps == kPSTlctl
-    double outNucleonEnergyAverage = ENiOnShellAverage;
+    double outNucleonEnergyAverage = ENiOnShellAverage + q0Tilde;
     Gfactor /= ( ENiOnShellAverage * outNucleonEnergyAverage );
   }
 
@@ -376,19 +364,14 @@ double NievesQELCCPXSec::XSec(const Interaction* interaction,
   return xsec;
 }
 //-----------------------------------------------------------------------------
-double NievesQELCCPXSec::Integral(const Interaction * in) const
+double NievesQELCCPXSec::Integral(const Interaction* in) const
 {
-  // If we're using the new spline generation method (which integrates
-  // over the kPSQELEvGen phase space used by QELEventGenerator) then
-  // let the cross section integrator do all of the work. It's smart
-  // enough to handle free nucleon vs. nuclear targets, different
-  // nuclear models (including the local Fermi gas model), etc.
-  if ( fXSecIntegrator->Id().Name() == "genie::NewQELXSec" ) {
+  if ( fXSecIntegrator->Id().Name() == "genie::NievesQELCCXSec" ) {
     return fXSecIntegrator->Integrate(this, in);
   }
   else {
     LOG("Nieves", pFATAL) << "Splines for the Nieves CCQE model must be"
-      << " generated using genie::NewQELXSec";
+      << " generated using genie::NievesQELCCXSec";
     std::exit(1);
   }
 }
