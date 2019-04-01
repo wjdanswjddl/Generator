@@ -11,7 +11,7 @@
 
  Important revisions after version 2.0.0 :
  @ Sep 22, 2008 - CA
-   This interction list generator was first added in version 2.5.1 as part of
+   This interaction list generator was first added in version 2.5.1 as part of
    the new event generation thread handling MEC interactions.
 */
 //____________________________________________________________________________
@@ -60,8 +60,14 @@ InteractionList *
   InteractionList * intlist = new InteractionList;
 
   if(!fSetDiNucleonCode&&fIsCC) {
-         LOG("IntLst", pINFO) << "fIsCC(val) = " << fIsCC;
+	 LOG("IntLst", pWARN) << "fIsCC(val) = " << fIsCC;
       Interaction * interaction = Interaction::MECCC(tgtpdg, nupdg, 0.0);
+      intlist->push_back(interaction);
+  }
+
+  if(!fSetDiNucleonCodeEM&&fIsEM) {
+   LOG("IntLst", pWARN) << "fIsCC(val) = " << fIsCC;
+      Interaction * interaction = Interaction::MECEM(tgtpdg, nupdg, 0.0);
       intlist->push_back(interaction);
   }
 
@@ -73,42 +79,42 @@ InteractionList *
      int ncpdg = nucleon_cluster[ic];
      if(fIsCC&&fSetDiNucleonCode) {
        bool allowed = false;
-       LOG("IntLst", pINFO) << "fIsCC(emp) = " << fIsCC;
+       LOG("IntLst", pWARN) << "fIsCC(emp) = " << fIsCC;
        if(pdg::IsNeutrino(nupdg)) {
          // neutrino CC => final state primary lepton is -1
          // therefore the nucleon-cluster charge needs to be incremented by +1.
-         if(ncpdg == kPdgClusterNN || ncpdg == kPdgClusterNP) {
-           allowed = true;
-         }
+	 if(ncpdg == kPdgClusterNN || ncpdg == kPdgClusterNP) {
+	   allowed = true;
+	 }
        }
        else
-         if(pdg::IsAntiNeutrino(nupdg)) {
-           // anti-neutrino CC => final state primary lepton is +1
-           // therefore the nucleon-cluster charge needs to be incremented by -1.
-           if(ncpdg == kPdgClusterNP || ncpdg == kPdgClusterPP) {
-             allowed = true;
-           }
-         }
+	 if(pdg::IsAntiNeutrino(nupdg)) {
+	   // anti-neutrino CC => final state primary lepton is +1
+	   // therefore the nucleon-cluster charge needs to be incremented by -1.
+	   if(ncpdg == kPdgClusterNP || ncpdg == kPdgClusterPP) {
+	     allowed = true;
+	   }
+	 }
        if(allowed) {
-         Interaction * interaction =
-           Interaction::MECCC(tgtpdg,ncpdg,nupdg,0);
-         intlist->push_back(interaction);
+	 Interaction * interaction =
+	   Interaction::MECCC(tgtpdg,ncpdg,nupdg,0);
+	 intlist->push_back(interaction);
        }
      }//CC?
      else
        if(fIsNC)
      {
-       LOG("IntLst", pINFO) << "fIsNC = " << fIsNC;
+       LOG("IntLst", pWARN) << "fIsNC = " << fIsNC;
        Interaction * interaction =
-         Interaction::MECNC(tgtpdg,ncpdg,nupdg,0);
+	 Interaction::MECNC(tgtpdg,ncpdg,nupdg,0);
        intlist->push_back(interaction);
      }//NC?
      else
-       if(fIsEM) {
-         LOG("IntLst", pINFO) << "fIsEM = " << fIsEM << "  ncpdg = " << ncpdg;
-         Interaction * interaction =
-           Interaction::MECEM(tgtpdg,ncpdg,nupdg,0);
-         intlist->push_back(interaction);
+       if(fIsEM&&fSetDiNucleonCodeEM) {
+	 LOG("IntLst", pWARN) << "fIsEM = " << fIsEM << "  ncpdg = " << ncpdg;
+	 Interaction * interaction =
+	   Interaction::MECEM(tgtpdg,ncpdg,nupdg,0);
+	 intlist->push_back(interaction);
        }//EM?
   }
   return intlist;
@@ -134,6 +140,7 @@ void MECInteractionListGenerator::LoadConfigData(void)
   GetParamDef( "is-EM", fIsEM, false ) ;
 
   GetParam( "SetDiNucleonCode", fSetDiNucleonCode ) ;
+  GetParam( "SetDiNucleonCodeEM", fSetDiNucleonCodeEM ) ;
 
 }
 //____________________________________________________________________________
