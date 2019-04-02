@@ -607,6 +607,12 @@ void NievesQELCCPXSec::LoadConfig(void)
   std::string temp_binding_mode;
   GetParamDef( "IntegralNucleonBindingMode", temp_binding_mode, std::string("UseNuclearModel") );
   fIntegralNucleonBindingMode = genie::utils::StringToQELBindingMode( temp_binding_mode );
+
+  // Cutoff energy for integrating over nucleon momentum distribution (above this
+  // lab-frame probe energy, the effects of Fermi motion and binding energy
+  // are taken to be negligible for computing the total cross section)
+  GetParamDef("IntegralNuclearInfluenceCutoffEnergy", fEnergyCutOff, 2.5 ) ;
+
 }
 //___________________________________________________________________________
 void NievesQELCCPXSec::CNCTCLimUcalc(TLorentzVector qTildeP4,

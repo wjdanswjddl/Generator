@@ -38,13 +38,14 @@ RmaxMode                             string   Yes        Method to use to comput
     <param type="alg"  name="XSec-Integrator">      genie::NewQELXSec/Default </param>
     <param type="alg"  name="IntegralNuclearModel"> genie::NuclearModelMap/Default </param>
     <param type="string" name="IntegralNucleonBindingMode"> OnShell </param>
+    <param type="double" name = "IntegralNuclearInfluenceCutoffEnergy"> 10.0 </param>
+
+    <param type="bool" name = "IntegralAverageOverNucleonMomentum">   true   </param>
 
     <param type="bool" name="RPA">             true                          </param>
     <param type="bool" name="Coulomb">         true                         </param>
     <param type="bool" name="PrintDebugData">  false                          </param>
 
-    <param type="bool" name = "IntegralAverageOverNucleonMomentum">   true   </param>
-    <param type="double" name = "IntegralNuclearInfluenceCutoffEnergy">    2.0   </param>
 
     <!-- Use the same Rmax as in genie::VertexGenerator -->
     <param type="string" name = "RmaxMode"> VertexGenerator </param>

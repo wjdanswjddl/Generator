@@ -36,7 +36,7 @@ IntegralNuclearInfluenceCutoffEnergy double   No
      <param type="bool" name = "IntegralAverageOverNucleonMomentum">     true   </param>
      <param type="alg"  name="IntegralNuclearModel">    genie::NuclearModelMap/Default        </param>
      <param type="string" name="IntegralNucleonBindingMode"> OnShell </param>
-     <param type="double" name = "IntegralNuclearInfluenceCutoffEnergy">    2.0   </param>     
+     <param type="double" name = "IntegralNuclearInfluenceCutoffEnergy"> 10.0 </param>
 
   </param_set>
 
