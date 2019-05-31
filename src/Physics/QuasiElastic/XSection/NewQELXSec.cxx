@@ -23,6 +23,7 @@
 #include "Physics/QuasiElastic/XSection/NewQELXSec.h"
 
 #include "Physics/NuclearState/NuclearModelI.h"
+#include "Physics/NuclearState/PauliBlocker.h"
 #include "Physics/XSectionIntegration/GSLXSecFunc.h"
 #include "Framework/Messenger/Messenger.h"
 #include "Framework/Numerical/RandomGen.h"
@@ -62,6 +63,12 @@ double NewQELXSec::Integrate(const XSecAlgorithmI* model, const Interaction* in)
   const NuclearModelI* nucl_model = dynamic_cast<const NuclearModelI*>(
     model->SubAlg("IntegralNuclearModel") );
   assert( nucl_model );
+
+  const PauliBlocker* pauli_blocker = dynamic_cast<const PauliBlocker*>(
+    model->SubAlg("PauliBlockerAlg") );
+  assert( pauli_blocker );
+
+  bool do_pauli_blocking = model->GetConfig().GetBool( "DoPauliBlocking" );
 
   AlgFactory* algf = AlgFactory::Instance();
   const VertexGenerator* vtx_gen = dynamic_cast<const VertexGenerator*>(
@@ -145,10 +152,23 @@ double NewQELXSec::Integrate(const XSecAlgorithmI* model, const Interaction* in)
     double radius = vertex_pos.Mag();
     tgt->SetHitNucPosition( radius );
 
-    // Sample a new nucleon 3-momentum and removal energy (this will be applied
-    // to the nucleon via a call to genie::utils::ComputeFullQELPXSec(), so
-    // there's no need to mess with its 4-momentum here)
+    // Sample a new nucleon 3-momentum and removal energy
     nucl_model->GenerateNucleon(*tgt, radius);
+
+    // Update the hit nucleon 4-momentum in the interaction object based on the
+    // new sampled values
+    double dummy_Eb = 0.;
+    genie::utils::BindHitNucleon(*interaction, *nucl_model, dummy_Eb, bind_mode);
+
+    // Check the allowed range for cos_theta_0. If it's vanishing, don't bother
+    // trying to integrate the cross section for this nucleon, because it will
+    // be vanishing anyway.
+    double cos_theta_0_max = genie::utils::CosTheta0Max(*interaction, pauli_blocker,
+      do_pauli_blocking);
+
+    if ( cos_theta_0_max <= -1. ) continue;
+    // Update the upper integration limit for cos_theta_0 accordingly
+    else kine_max[0] = cos_theta_0_max;
 
     // The initial state variables have all been defined, so integrate over
     // the final lepton angles.
@@ -251,7 +271,7 @@ double genie::utils::gsl::FullQELdXSec::DoEval(const double* xin) const
 
   // Compute the full differential cross section
   double xsec = genie::utils::ComputeFullQELPXSec(fInteraction, fNuclModel,
-    fXSecModel, cos_theta0, phi0, dummy_Eb, fHitNucleonBindingMode, fMinAngleEM, true);
+    fXSecModel, cos_theta0, phi0, dummy_Eb, fHitNucleonBindingMode, fMinAngleEM, false);
 
   return xsec;
 }

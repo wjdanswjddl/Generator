@@ -214,7 +214,9 @@ genie::QELEvGen_BindingMode_t genie::utils::StringToQELBindingMode(
   }
 }
 
-double genie::utils::CosTheta0Max(const genie::Interaction& interaction) {
+double genie::utils::CosTheta0Max(const genie::Interaction& interaction,
+  const genie::PauliBlocker* pauli_blocker, bool do_pauli_blocking)
+{
 
   // q0 > 0 only needs to be enforced (indirectly via a calculation of
   // CosTheta0Max) for bound nucleons. The Q2 limits should take care of valid
@@ -250,6 +252,16 @@ double genie::utils::CosTheta0Max(const genie::Interaction& interaction) {
   double ENi_on_shell = std::sqrt( mNi*mNi + p4Ni.Vect().Mag2() );
   // Energy needed to put initial nucleon on the mass shell
   double epsilon_B = ENi_on_shell - ENi;
+
+  // The maximum angle may be lower if we're including the effect of
+  // Pauli blocking. Check for this if appropriate.
+  if ( pauli_blocker && do_pauli_blocking ) {
+    double kF = pauli_blocker->GetFermiMomentum(
+      interaction.InitState().Tgt(), interaction.RecoilNucleonPdg(),
+      interaction.InitState().Tgt().HitNucPosition() );
+    double EF = std::sqrt( mNf*mNf + kF*kF );
+    if ( EF > ENi_on_shell ) epsilon_B = EF - ENi;
+  }
 
   double cos_theta0_max = ( probe_E_lab - gamma*lepton_E_COM - epsilon_B )
     / ( gamma * lepton_p_COM * beta.Mag() );

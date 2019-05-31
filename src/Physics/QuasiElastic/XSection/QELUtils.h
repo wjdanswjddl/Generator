@@ -3,6 +3,7 @@
 
 #include "Framework/Interaction/Interaction.h"
 #include "Physics/NuclearState/NuclearModelI.h"
+#include "Physics/NuclearState/PauliBlocker.h"
 #include "Framework/EventGen/XSecAlgorithmI.h"
 
 #include "TLorentzVector.h"
@@ -39,7 +40,9 @@ namespace genie {
       QELEvGen_BindingMode_t hitNucleonBindingMode, double min_angle_EM = 0.,
       bool bind_nucleon = true);
 
-    double CosTheta0Max(const genie::Interaction& interaction);
+    double CosTheta0Max(const genie::Interaction& interaction,
+      const genie::PauliBlocker* pauli_blocker = NULL, bool do_pauli_blocking = false);
+
 
     void BindHitNucleon(Interaction& interaction, const NuclearModelI& nucl_model,
       double& Eb, QELEvGen_BindingMode_t hitNucleonBindingMode);
