@@ -176,24 +176,30 @@ double NievesQELCCPXSec::XSec(const Interaction * interaction,
       return 0.0;
     }
 
-    // The Coulomb correction factor blows up as pl -> 0. To guard against
-    // unphysically huge corrections here, require that the lepton kinetic energy
-    // (at infinity) is larger than the magnitude of the Coulomb potential
-    // (should be around a few MeV)
-    double KEl = El - ml;
-    if ( KEl <= std::abs(Vc) ) {
-      LOG("Nieves", pDEBUG) << "Outgoing lepton has a very small kinetic energy."
-        << " Protecting against near-singularities in the Coulomb correction"
-        << " factor by returning xsec = 0.0";
-      return 0.0;
-    }
-
     // Local value of the lepton 3-momentum magnitude for the Coulomb
     // correction
     plLocal = TMath::Sqrt( ElLocal*ElLocal - ml2 );
 
-    // Correction factor
-    coulombFactor= (plLocal * ElLocal) / (pl * El);
+    // The Coulomb correction factor blows up as pl -> 0. To guard against
+    // unphysically huge corrections here, require that the lepton kinetic energy
+    // (at infinity) is larger than the magnitude of the Coulomb potential
+    // (should be around a few MeV). If it isn't, then use a modified
+    // pl in the Coulomb correction factor in which the lepton kinetic
+    // energy is artificially inflated to match the Coulomb potential magnitude.
+    double KEl = El - ml;
+    if ( KEl <= std::abs(Vc) ) {
+      LOG("Nieves", pDEBUG) << "Outgoing lepton has a very small kinetic energy."
+        << " Protecting against near-singularities in the Coulomb correction"
+        << " factor by using an inflated value of plLocal.";
+
+      double ElFake = ml + std::abs(Vc);
+      double plFake = TMath::Sqrt( ElFake*ElFake - ml2 );
+      coulombFactor = (plLocal * ElLocal) / (plFake * ElFake);
+    }
+    else {
+      // Correction factor
+      coulombFactor= (plLocal * ElLocal) / (pl * El);
+    }
 
   }
 
