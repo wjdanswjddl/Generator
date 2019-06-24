@@ -33,7 +33,7 @@ IntegralNuclearInfluenceCutoffEnergy double   No
      <param type="alg"  name="XSec-Integrator"> genie::NewQELXSec/Default </param>
     
      <param type="alg"  name="IntegralNuclearModel"> genie::NuclearModelMap/Default </param>
-     <param type="string" name="IntegralNucleonBindingMode"> UseNuclearModel </param>
+     <param type="string" name="IntegralNucleonBindingMode"> UseGroundStateRemnant </param>
      <param type="double" name = "IntegralNuclearInfluenceCutoffEnergy"> 10.0 </param>
 
      <param type="alg" name = "PauliBlockerAlg"> genie::PauliBlocker/Default </param>
