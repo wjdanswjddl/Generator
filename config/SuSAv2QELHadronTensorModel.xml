@@ -29,6 +29,8 @@ DataPathType       string   Yes        Whether the specified path is    relative
     <param type="string" name="QE_Full@Pdg=1000060120"> SuSAv2_1000060120_QE_Full.dat </param>
     <param type="string" name="QE_EM@Pdg=1000060120"> SuSAv2_1000060120_QE_EM.dat </param>
 
+    <param type="string" name="QE_EM@Pdg=1000020040"> sta-4He.txt </param>
+
   </param_set>
 
 </alg_conf>

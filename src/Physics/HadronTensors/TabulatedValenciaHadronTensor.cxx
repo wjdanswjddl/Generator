@@ -502,15 +502,15 @@ double genie::TabulatedValenciaHadronTensor::dSigma_dT_dCosTheta_rosenbluth(int 
     if (probe_pdg < 0) RTP *= -1; // THIS IS FOR NUBAR
 
 
-    // Determination of the double differential cross section: dsigma/dcostheta_ldEl. In order to calculate dsigma/dcostheta_ldp_l, the c.s. must be multiplied by k_final/El 
+    // Determination of the double differential cross section: dsigma/dcostheta_ldEl. In order to calculate dsigma/dcostheta_ldp_l, the c.s. must be multiplied by k_final/El
     xsec= sig0*(VCC*RCC+2.*VCL*RCL+VLL*RLL+VT*RT+2.*VTP*RTP);//*xcorr
 
 
     // This should never happen using the full SuSAv2-MEC hadron tensors
-    // but can trigger when using the tensors from the parameterisation    
-    if(xsec<0){ 
-      xsec=0.; 
-    } 
+    // but can trigger when using the tensors from the parameterisation
+    if(xsec<0){
+      xsec=0.;
+    }
 
     //std::cout << "Interaction kinematics: " << std::endl;
     //std::cout << " E_probe is: " << E_probe << std::endl;
@@ -518,7 +518,7 @@ double genie::TabulatedValenciaHadronTensor::dSigma_dT_dCosTheta_rosenbluth(int 
     //std::cout << " cos_l   is: " << cos_l   << std::endl;
     //std::cout << " ml      is: " << ml      << std::endl;
     //std::cout << " q0      is: " << q0      << std::endl;
-    //std::cout << " q_mag   is: " << q_mag   << std::endl;    
+    //std::cout << " q_mag   is: " << q_mag   << std::endl;
     //std::cout << "Neutrino debugging: " << std::endl;
     //std::cout << "xsec is " << xsec/units::cm2 << std::endl;
     //std::cout << "sig0 is " << sig0/units::cm2 << std::endl;
