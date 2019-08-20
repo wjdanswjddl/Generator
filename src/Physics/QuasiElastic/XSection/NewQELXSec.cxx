@@ -31,6 +31,8 @@
 #include "Physics/NuclearState/NuclearModel.h"
 #include "Physics/NuclearState/NuclearModelMap.h"
 
+#include "Physics/QuasiElastic/XSection/SampleStats.h"
+
 using namespace genie;
 using namespace genie::constants;
 using namespace genie::utils::gsl;
@@ -126,6 +128,8 @@ double NewQELXSec::Integrate(const XSecAlgorithmI* model, const Interaction* in)
     return xsec_total;
   }
 
+  SampleStats ss;
+
   // For a nuclear target, we need to loop over a bunch of nucleons sampled
   // from the nuclear model (with positions sampled from the vertex generator
   // to allow for using the local Fermi gas model). The MC estimator for the
@@ -150,6 +154,8 @@ double NewQELXSec::Integrate(const XSecAlgorithmI* model, const Interaction* in)
     // the final lepton angles.
     double xsec = ig.Integral(kine_min, kine_max);
 
+    ss.AddValue( xsec );
+
     xsec_sum += xsec;
   }
 
@@ -157,6 +163,13 @@ double NewQELXSec::Integrate(const XSecAlgorithmI* model, const Interaction* in)
 
   // MC estimator of the total cross section is the mean of the xsec values
   double xsec_mean = xsec_sum / fNumNucleonThrows;
+
+  double Ev = in->InitState().ProbeE( kRfLab );
+  std::cout << "\n Ev = " << Ev << ", xsec = " << ss.Mean();
+  if ( ss.Mean() > 0. ) {
+    std::cout << ", rel error = " << std::sqrt( ss.SampleVariance() / ss.SampleSize() ) / ss.Mean();
+  }
+  std::cout << '\n';
 
   return xsec_mean;
 }
