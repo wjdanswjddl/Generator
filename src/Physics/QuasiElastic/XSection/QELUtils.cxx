@@ -206,6 +206,9 @@ genie::QELEvGen_BindingMode_t genie::utils::StringToQELBindingMode(
   else if ( binding_mode == "OnShell" ) {
     return kOnShell;
   }
+  else if ( binding_mode == "BoundOnShell" ) {
+    return kBoundOnShell;
+  }
   else {
     LOG("QELEvent", pFATAL) << "Unrecognized setting \"" << binding_mode
       << "\" requested in genie::utils::StringToQELBindingMode()";
@@ -274,7 +277,8 @@ void genie::utils::BindHitNucleon(genie::Interaction& interaction,
   // the selected binding energy mode. Always put the initial nucleon
   // on shell if it is not part of a composite nucleus
   double ENi = 0.;
-  if ( tgt->IsNucleus() && hitNucleonBindingMode != genie::kOnShell ) {
+  if ( tgt->IsNucleus() && hitNucleonBindingMode != genie::kOnShell
+    && hitNucleonBindingMode != genie::kBoundOnShell ) {
 
     // For a nuclear target with a bound initial struck nucleon, take binding
     // energy effects and Pauli blocking into account when computing QE
@@ -318,9 +322,9 @@ void genie::utils::BindHitNucleon(genie::Interaction& interaction,
     ENi = Mi - std::sqrt( Mf*Mf + p3Ni.Mag2() );
   }
   else {
-    // Keep the struck nucleon on shell either because
-    // hitNucleonBindingMode == kOnShell or because
-    // the target is a single nucleon
+    // Keep the struck nucleon on shell either because hitNucleonBindingMode ==
+    // kOnShell, hitNucleonBindingMode == kBoundOnShell, or because the target
+    // is a single nucleon
     ENi = std::sqrt( p3Ni.Mag2() + std::pow(mNi, 2) );
     Eb = 0.;
 
@@ -328,7 +332,8 @@ void genie::utils::BindHitNucleon(genie::Interaction& interaction,
     // binding mode, set the "assume free nucleon" flag. This turns off
     // Pauli blocking and the requirement that q0 > 0 in the QE cross section
     // models (an on-shell nucleon *is* a free nucleon)
-    if ( tgt->IsNucleus() ) interaction.SetBit( kIAssumeFreeNucleon );
+    if ( tgt->IsNucleus() && hitNucleonBindingMode != kBoundOnShell )
+      interaction.SetBit( kIAssumeFreeNucleon );
   }
 
   // Update the initial nucleon lab-frame 4-momentum in the interaction with

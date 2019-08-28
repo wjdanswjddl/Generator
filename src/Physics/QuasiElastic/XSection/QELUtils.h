@@ -24,7 +24,11 @@ namespace genie {
     kUseGroundStateRemnant,
 
     // Leave the struck nucleon on shell, effectively ignoring its binding energy
-    kOnShell
+    kOnShell,
+
+    // Leave the struck nucleon on shell, but pretend it's still bound (apply Pauli
+    // blocking, q0 >= 0 requirement, RPA corrections, etc.)
+    kBoundOnShell
   } QELEvGen_BindingMode_t;
 
   namespace utils {
