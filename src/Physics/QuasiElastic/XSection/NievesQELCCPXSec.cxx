@@ -217,8 +217,7 @@ double NievesQELCCPXSec::XSec(const Interaction * interaction,
   // 3-momentum transfer, and so the correction should be applied *before*
   // rotating coordinates into a frame where q3VecTilde lies along the positive
   // z axis.
-  TVector3 leptonMomCoulomb3 = (! fCoulomb ) ? leptonMom3
-    : plLocal * leptonMom3 * (1. / leptonMom3.Mag());
+  TVector3 leptonMomCoulomb3 = leptonMom3;
   TVector3 q3VecTilde = neutrinoMom3 - leptonMomCoulomb3;
 
   // Find the rotation angle needed to put q3VecTilde along z
