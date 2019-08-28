@@ -47,12 +47,8 @@ RmaxMode                             string   Yes        Method to use to comput
     <param type="alg" name = "PauliBlockerAlg"> genie::PauliBlocker/Default </param>
     <param type="bool" name = "DoPauliBlocking"> true </param>
 
-    <!-- Use the same Rmax as in genie::VertexGenerator -->
-    <param type="string" name = "RmaxMode"> VertexGenerator </param>
-
-    <!-- Use the same Rmax as in Nieves' original paper
+    <!-- Use the same Rmax as in Nieves' original paper -->
       <param type="string" name = "RmaxMode"> Nieves </param>
-    -->
 
   </param_set>
 
