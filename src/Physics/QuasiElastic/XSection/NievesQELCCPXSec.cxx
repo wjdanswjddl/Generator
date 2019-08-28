@@ -401,8 +401,14 @@ double NievesQELCCPXSec::Integral(const Interaction * in) const
         << pdg::IonPdgCode(Af, Zf) << " in PDGLibrary!";
       exit(1);
     }
-    double Mi  = nucl_i -> Mass(); // initial nucleus mass
-    double Mf  = nucl_f -> Mass(); // remnant nucleus mass
+
+    // Look up the (on-shell) mass of the initial nucleon
+    TDatabasePDG* tb = TDatabasePDG::Instance();
+    double mNi = tb->GetParticle( tgt->HitNucPdg() )->Mass();
+
+    double Mi  = tgt -> Mass(); // initial nucleus mass
+    double Eb = fNuclModel->RemovalEnergy();
+    double Mf  = Mi + Eb - mNi; // remnant nucleus mass
 
     // throw nucleons with fermi momenta and binding energies
     // generated according to the current nuclear model for the
