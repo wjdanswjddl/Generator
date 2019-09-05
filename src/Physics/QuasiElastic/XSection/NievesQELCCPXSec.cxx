@@ -133,7 +133,7 @@ double NievesQELCCPXSec::XSec(const Interaction * interaction,
     // Calculate G factor
     double E = init_state.ProbeE(kRfHitNucRest);
     double M  = target.HitNucMass();
-    double M2 = TMath::Power(M,     2);
+    double M2 = inNucleonMom.M2();
     double s = (2*E+M)*M;
     double num = TMath::Power(s-M2,2);
     Gfactor = kGF2 * fCos8c2 / (8*kPi*num);
