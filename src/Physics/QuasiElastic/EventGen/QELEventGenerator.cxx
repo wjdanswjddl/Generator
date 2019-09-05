@@ -188,11 +188,6 @@ void QELEventGenerator::ProcessEventRecord(GHepRecord * evrec) const
         if ( cos_theta0_max <= -1. ) continue;
 
         // Pick a direction
-        // NOTE: In the kPSQELEvGen phase space used by this generator,
-        // these angles are specified with respect to the velocity of the
-        // probe + hit nucleon COM frame as measured in the lab frame. That is,
-        // costheta = 1 means that the outgoing lepton's COM frame 3-momentum
-        // points parallel to the velocity of the COM frame.
         double costheta = rnd->RndKine().Uniform(-1., cos_theta0_max); // cosine theta
         double phi = rnd->RndKine().Uniform( 2.*kPi ); // phi: [0, 2pi]
 

@@ -128,32 +128,9 @@ double genie::utils::ComputeFullQELPXSec(genie::Interaction* interaction,
   // in the lab frame.
   TVector3 beta = COMframe2Lab( interaction->InitState() );
 
-  // FullDifferentialXSec depends on theta_0 and phi_0, the lepton COM
-  // frame angles with respect to the direction of the COM frame velocity
-  // as measured in the lab frame. To generate the correct dependence
-  // here, first set the lepton COM frame angles with respect to +z
-  // (via TVector3::SetTheta() and TVector3::SetPhi()).
   TVector3 lepton3Mom(0., 0., outMomentum);
   lepton3Mom.SetTheta( TMath::ACos(cos_theta_0) );
   lepton3Mom.SetPhi( phi_0 );
-
-  // Then rotate the lepton 3-momentum so that the old +z direction now
-  // points along the COM frame velocity (beta)
-  TVector3 zvec(0., 0., 1.);
-  TVector3 rot = ( zvec.Cross(beta) ).Unit();
-  double angle = beta.Angle( zvec );
-
-  // Handle the edge case where beta is along -z, so the
-  // cross product above vanishes
-  if ( beta.Perp() == 0. && beta.Z() < 0. ) {
-    rot = TVector3(0., 1., 0.);
-    angle = genie::constants::kPi;
-  }
-
-  // Rotate if the rotation vector is not 0
-  if ( rot.Mag() >= genie::controls::kASmallNum ) {
-    lepton3Mom.Rotate(angle, rot);
-  }
 
   // Construct the lepton 4-momentum in the COM frame
   TLorentzVector lepton(lepton3Mom, outLeptonEnergy);
