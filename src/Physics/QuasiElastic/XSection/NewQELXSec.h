@@ -76,13 +76,9 @@ public:
   void Configure(const Registry& config);
   void Configure(std::string config);
 
-
 private:
 
   void LoadConfig (void);
-
-  // Configuration obtained from cross section model
-  QELEvGen_BindingMode_t fBindingMode;
 
   // XML configuration parameters
   std::string fGSLIntgType;
@@ -91,6 +87,15 @@ private:
   AlgId fVertexGenID;
   int fNumNucleonThrows;
   double fMinAngleEM;
+
+  // If false, the total cross section will be computed by integrating over
+  // lepton scattering angles while preserving the momentum and removal energy
+  // of the initial hit nucleon (specified in the input Interaction object).
+  // This approach is needed for "CCQE shape" tweak dials in Reweight. If true
+  // (default), then an MC integration is also performed over the distribution
+  // of initial nucleons. This approach is needed to create total cross section
+  // splines.
+  bool fAverageOverNucleons;
 };
 
 
