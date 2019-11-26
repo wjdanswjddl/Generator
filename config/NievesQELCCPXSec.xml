@@ -66,4 +66,9 @@ RmaxMode                             string   Yes        Method to use to comput
     <param type="alg"  name="FormFactorsAlg"> genie::LwlynSmithFFCC/ZExp </param>
   </param_set>
 
+  <param_set name="DipoleUGSR">
+    <param type="alg"  name="FormFactorsAlg"> genie::LwlynSmithFFCC/Dipole </param>
+    <param type="string" name="IntegralNucleonBindingMode"> UseGroundStateRemnant </param>
+  </param_set>
+
 </alg_conf>

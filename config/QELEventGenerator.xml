@@ -28,7 +28,11 @@ HitNucleonBindingMode    string  Yes   Method used to handle the binding energy 
     <!-- <param type="string" name="HitNucleonBindingMode"> OnShell </param> -->
     <!-- <param type="string" name="HitNucleonBindingMode"> UseGroundStateRemnant </param> -->
   </param_set>
-  
+
+  <param_set name="UGSR">
+    <param type="string" name="HitNucleonBindingMode"> UseGroundStateRemnant </param>
+  </param_set>
+
   <param_set name="CC-Default">
 
   </param_set>
