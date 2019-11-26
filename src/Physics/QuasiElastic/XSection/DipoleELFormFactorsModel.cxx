@@ -5,13 +5,13 @@
  or see $GENIE/LICENSE
 
  Author: Costas Andreopoulos <costas.andreopoulos \at stfc.ac.uk>
-         University of Liverpool & STFC Rutherford Appleton Lab 
+         University of Liverpool & STFC Rutherford Appleton Lab
 
  For the class documentation see the corresponding header file.
 
  Important revisions after version 2.0.0 :
  @ Sep 19, 2009 - CA
-   Moved into the ElFF package from its previous location               
+   Moved into the ElFF package from its previous location
 
 */
 //____________________________________________________________________________
@@ -93,7 +93,7 @@ void DipoleELFormFactorsModel::Configure(string param_set)
 void DipoleELFormFactorsModel::LoadConfig(void)
 {
   // vector mass
-  GetParam( "EL-Mv", fMv ) ;
+  GetParam( "QEL-Mv", fMv ) ;
   fMv2 = TMath::Power(fMv,2);
 
   // anomalous magnetic moments
