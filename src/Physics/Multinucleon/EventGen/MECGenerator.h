@@ -26,6 +26,7 @@
 
 #include "Framework/EventGen/EventRecordVisitorI.h"
 #include "Framework/ParticleData/PDGCodeList.h"
+#include "Physics/QuasiElastic/XSection/QELUtils.h" // For definition of QELEvGen_BindingMode_t
 
 namespace genie {
 
@@ -60,12 +61,17 @@ private:
   void    SelectNSVLeptonKinematics         (GHepRecord * event) const;
   void    GenerateNSVInitialHadrons         (GHepRecord * event) const;
   PDGCodeList NucleonClusterConstituents    (int pdgc)           const;
-  
+
   mutable const XSecAlgorithmI * fXSecModel;
   mutable TGenPhaseSpace         fPhaseSpaceGenerator;
   const NuclearModelI *          fNuclModel;
 
   double fQ3Max;
+
+  // Specifies the recipe for assigning binding energies
+  // to the initial-state nucleons. This correction is
+  // only applied when using the Valencia MEC model.
+  QELEvGen_BindingMode_t fHitNucleonBindingMode;
 };
 
 }      // genie namespace

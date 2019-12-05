@@ -18,7 +18,18 @@ NSV-Q3Max        double   No         Q3 max for 2p2h model                      
     <param type="string" name="CommonParam"> MultiNucleons </param>
     
     <param type="alg" name="NuclearModel"> genie::NuclearModelMap/Default </param>
-     
+
+    <!-- Binding energy correction currently only applied to the Valencia MEC model -->
+    <param type="string" name="NSVHitNucleonBindingMode"> UseNuclearModel </param>
+
+  </param_set>
+
+  <param_set name="UGSR">
+    <param type="string" name="NSVHitNucleonBindingMode"> UseGroundStateRemnant </param>
+  </param_set>
+
+  <param_set name="OnShell">
+    <param type="string" name="NSVHitNucleonBindingMode"> OnShell </param>
   </param_set>
   
 </alg_conf>
