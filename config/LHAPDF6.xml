@@ -18,6 +18,11 @@ MemberID         int      No         LHAPDF PDF number within set name
      <param type="string" name="SetName">  CT10nlo </param>
      <param type="int"    name="MemberID"> 0       </param>
   </param_set>
+
+  <param_set name="CT10">
+     <param type="string" name="SetName">  CT10 </param>
+     <param type="int"    name="MemberID"> 0       </param>
+  </param_set>
   
 </alg_conf>
 

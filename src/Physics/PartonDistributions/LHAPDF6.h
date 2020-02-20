@@ -50,11 +50,13 @@ public:
   double Gluon       (double x, double Q2) const;
   PDF_t  AllPDFs     (double x, double Q2) const;
 
-  // Override the default "Configure" implementation 
+  // Override the default "Configure" implementation
   // of the Algorithm interface
 
   void Configure (const Registry & config);
   void Configure (string config);
+
+  inline const LHAPDF::PDF* GetPDF() const { return fLHAPDF; }
 
 private:
 
