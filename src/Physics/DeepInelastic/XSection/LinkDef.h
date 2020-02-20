@@ -19,5 +19,6 @@
 
 #pragma link C++ class genie::DISXSec;
 
+#pragma link C++ class genie::AMUValStrucFunc;
 
 #endif

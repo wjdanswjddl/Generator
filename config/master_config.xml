@@ -109,6 +109,7 @@
    <config alg="genie::LwlynSmithFFNC">                          LwlynSmithFFNC.xml                          </config>
    <config alg="genie::QPMDISStrucFunc">                         QPMDISStrucFunc.xml                         </config>
    <config alg="genie::BYStrucFunc">                             BYStrucFunc.xml                             </config>
+   <config alg="genie::AMUValStrucFunc">                         AMUValStrucFunc.xml                         </config>
    <config alg="genie::RSHelicityAmplModelCC">                   RSHelicityAmplModelCC.xml                   </config>
    <config alg="genie::RSHelicityAmplModelNCp">                  RSHelicityAmplModelNCp.xml                  </config>
    <config alg="genie::RSHelicityAmplModelNCn">                  RSHelicityAmplModelNCn.xml                  </config>

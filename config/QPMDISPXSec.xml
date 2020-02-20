@@ -30,5 +30,10 @@ WeinbergAngle               double  No                                          
      <param type="double" name="DIS-XSecScale">    1.032 </param>
   </param_set>
 
-</alg_conf>
+  <!-- Alternate configuration that uses structure functions computed according
+       to the AMUVal approach -->
+  <param_set name="AMUVal">
+     <param type="alg" name="SFAlg"> genie::AMUValStrucFunc/Default </param>
+  </param_set>
 
+</alg_conf>

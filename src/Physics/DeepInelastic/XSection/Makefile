@@ -25,4 +25,12 @@ install : install-inc install-lib
 #
 include $(GENIE)/src/make/Make.std-package-targets
 
+# Add extra source files (from Huma) to this library.
+# We get them in this way to avoid problems generating ROOT
+# dictionaries from her code.
+EXTRA_SOURCES := $(wildcard *.cpp)
+EXTRA_OBJECTS = $(addsuffix .$(ObjSuf), $(basename $(EXTRA_SOURCES)))
+
+LIB_DEPEND := $(LIB_DEPEND) $(EXTRA_OBJECTS)
+
 FORCE:
