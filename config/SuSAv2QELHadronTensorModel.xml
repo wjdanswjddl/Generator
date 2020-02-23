@@ -18,7 +18,9 @@ DataPathType       string   Yes        Whether the specified path is    relative
 
   <param_set name="Default">
 
+<!--    <param type="string" name="DataPath"> data/evgen/hadron_tensors/Noemi </param> -->
     <param type="string" name="DataPath"> data/evgen/hadron_tensors/susav2 </param>
+    
     <param type="string" name="DataPathType"> relative </param>
     <!-- Paths can be absolute or relative to the $GENIE folder -->
     <!-- <param type="string" name="DataPathType"> relative </param> -->
@@ -27,9 +29,25 @@ DataPathType       string   Yes        Whether the specified path is    relative
     <param type="string" name="QE_EM@Pdg=1000010010"> SuSAv2_1000010010_QE_EM.dat </param>
 
     <param type="string" name="QE_Full@Pdg=1000060120"> SuSAv2_1000060120_QE_Full.dat </param>
-    <param type="string" name="QE_EM@Pdg=1000060120"> SuSAv2_1000060120_QE_EM.dat </param>
+<!--    <param type="string" name="QE_EM@Pdg=1000060120"> SuSAv2_1000060120_QE_EM.dat </param>
+-->
+    <param type="string" name="QE_EM@Pdg=1000060120"> Rocco_HT_12C_EM_QE.txt </param>
 
-    <param type="string" name="QE_EM@Pdg=1000020040"> sta-4He.txt </param>
+<!-- Below this line is OLD thresholds (June 2019) with no particle identities -->
+<!--    <param type="string" name="QE_EM@Pdg=1000020040"> sta-4He.txt </param> -->
+
+<!-- Below this is NEW thresholds (August 2019) with particle identity information -->
+<!--    <param type="string" name="QE_EM@Pdg=1000020040"> tot_table-4He.txt </param> -->
+<!--    <param type="string" name="QE_EM@Pdg=1000020040"> 1bdiag_table-4He.txt </param> -->
+<!--    <param type="string" name="QE_EM@Pdg=1000020040"> 1boff_table-4He.txt </param> -->
+<!--    <param type="string" name="QE_EM@Pdg=1000020040"> 2b_table-4He.txt </param> -->
+<!--    <param type="string" name="QE_EM@Pdg=1000020040"> int_table-4He.txt </param> -->
+<!--    <param type="string" name="QE_EM@Pdg=1000020040"> tot_nn_table-4He.txt </param> -->
+    <param type="string" name="QE_EM@Pdg=1000020040"> tot_pp_table-4He.txt </param>
+
+<!-- Below this is February 2020 He3 without particle identity information -->
+    <param type="string" name="QE_EM@Pdg=1000020030"> tot_table-3He.txt </param>
+
 
   </param_set>
 
