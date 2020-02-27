@@ -4,7 +4,7 @@
  For the full text of the license visit http://copyright.genie-mc.org
 
  Steven Gardiner <gardiner \at fnal.gov>
- Fermi National Accelerator Laboratory 
+ Fermi National Accelerator Laboratory
 */
 //____________________________________________________________________________
 
@@ -156,6 +156,14 @@ double NewQELXSec::Integrate(const XSecAlgorithmI* model, const Interaction* in)
 
     ss.AddValue( xsec );
 
+    LOG("NewQELXSec", pDEBUG) << "Nucleon #" << n << ": mean_tot_xsec = "
+      << ss.Mean() / (1e-38*genie::units::cm2) << " ± "
+      << ss.StdErrorOnMean() / (1e-38*genie::units::cm2)
+      << " \u00D7 10^{-38} cm^2 ";
+
+    LOG("NewQELXSec", pDEBUG) << "  rel. error = "
+      << ss.StdErrorOnMean() / ss.Mean();
+
     xsec_sum += xsec;
   }
 
@@ -167,7 +175,7 @@ double NewQELXSec::Integrate(const XSecAlgorithmI* model, const Interaction* in)
   double Ev = in->InitState().ProbeE( kRfLab );
   std::cout << "\n Ev = " << Ev << ", xsec = " << ss.Mean();
   if ( ss.Mean() > 0. ) {
-    std::cout << ", rel error = " << std::sqrt( ss.SampleVariance() / ss.SampleSize() ) / ss.Mean();
+    std::cout << ", rel error = " << ss.StdErrorOnMean() / ss.Mean();
   }
   std::cout << '\n';
 

@@ -18,7 +18,11 @@ class SampleStats {
     inline double Mean() const { return fMean; }
     //inline double FinitePopulationVariance() const { return fM2 / fN; }
     inline double SampleVariance() const { return fM2 / (fN - 1); }
+    inline double SampleStdDeviation() const
+      { return std::sqrt( this->SampleVariance() ); }
     inline int SampleSize() const { return fN; }
+    inline double StdErrorOnMean() const
+      { return this->SampleStdDeviation() / std::sqrt(fN); }
 
   protected:
 

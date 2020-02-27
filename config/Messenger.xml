@@ -168,6 +168,8 @@
   <priority msgstream="PathL">                 NOTICE </priority>
   <priority msgstream="PhysUtil">              WARN   </priority>
   <priority msgstream="QELXSec">               NOTICE </priority>
+  <priority msgstream="NewQELXSec">            DEBUG  </priority>
+  <priority msgstream="UnifiedQELPXSec">       DEBUG  </priority>
   <priority msgstream="QELCharmXSec">          NOTICE </priority>
   <priority msgstream="QELEvent">              NOTICE </priority>
   <priority msgstream="QELHadronicVtx">        WARN   </priority>
