@@ -257,5 +257,13 @@ values for each Reweight tweak dial. All of these have default values of zero.
    <param type="double" name="CoulombCCQE@PlusOneSigma"> 0.20 </param>
    <param type="double" name="CoulombCCQE@MinusOneSigma"> 0.20 </param>
 
+   <!-- Placeholder 20% uncertainties on the normalization of non-COH CC and NC events
+        that include a pi0 in the final state - S. Gardiner -->
+   <param type="double" name="NormCCNonCOHPi0@PlusOneSigma"> 0.20 </param>
+   <param type="double" name="NormCCNonCOHPi0@MinusOneSigma"> 0.20 </param>
+
+   <param type="double" name="NormNCNonCOHPi0@PlusOneSigma"> 0.20 </param>
+   <param type="double" name="NormNCNonCOHPi0@MinusOneSigma"> 0.20 </param>
+
  </param_set>
 </alg_conf>
