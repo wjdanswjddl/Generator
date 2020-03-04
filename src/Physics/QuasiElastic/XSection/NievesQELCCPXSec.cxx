@@ -489,6 +489,9 @@ void NievesQELCCPXSec::LoadConfig(void)
 
   // Decide whether or not it should be used in XSec()
   GetParamDef( "DoPauliBlocking", fDoPauliBlocking, true );
+
+  // Scaling factor for the Coulomb potential
+  GetParamDef( "CoulombScale", fCoulombScale, 1.0 );
 }
 //___________________________________________________________________________
 void NievesQELCCPXSec::CNCTCLimUcalc(TLorentzVector qTildeP4,
@@ -855,7 +858,8 @@ double NievesQELCCPXSec::vcr(const Target * target, double Rcurr) const{
 
     // Multiply by Z to normalize densities to number of protons
     // Multiply by hbarc to put result in GeV instead of fm
-    return -kAem*4*kPi*result*fhbarc;
+    // Multiply by an extra configurable scaling factor that defaults to unity
+    return -kAem*4*kPi*result*fhbarc*fCoulombScale;
   }else{
     // If target is not a nucleus the potential will be 0
     return 0.0;
