@@ -72,7 +72,7 @@
 
 \created December 15, 2005
 
-\cpright Copyright (c) 2003-2019, The GENIE Collaboration
+\cpright Copyright (c) 2003-2018, The GENIE Collaboration
          For the full text of the license visit http://copyright.genie-mc.org
          or see $GENIE/LICENSE
 */
@@ -568,9 +568,11 @@ void SaveGraphsToRootFile(void)
   topdir = froot->mkdir(dptr.str().c_str(),dtitle.str().c_str());
   topdir->cd();
 
-  double   de = (gEmax-gEmin)/(kNSplineP-1);
+  double de = ( TMath::Log10(gEmax) - TMath::Log10(gEmin) ) / ( kNSplineP - 1 );
   double * e  = new double[kNSplineP];
-  for(int i=0; i<kNSplineP; i++) {  e[i]  = gEmin + i*de; }
+  for(int i=0; i<kNSplineP; i++) {
+    e[i] = TMath::Power(10., TMath::Log10(gEmin) + i * de);
+  }
 
   double * xs = new double[kNSplineP];
 
