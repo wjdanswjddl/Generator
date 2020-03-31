@@ -37,13 +37,13 @@ DataPathType       string   Yes        Whether the specified path is    relative
 <!--    <param type="string" name="QE_EM@Pdg=1000020040"> sta-4He.txt </param> -->
 
 <!-- Below this is NEW thresholds (August 2019) with particle identity information -->
-<!--    <param type="string" name="QE_EM@Pdg=1000020040"> tot_table-4He.txt </param> -->
+    <param type="string" name="QE_EM@Pdg=1000020040"> tot_table-4He.txt </param> 
 <!--    <param type="string" name="QE_EM@Pdg=1000020040"> 1bdiag_table-4He.txt </param> -->
 <!--    <param type="string" name="QE_EM@Pdg=1000020040"> 1boff_table-4He.txt </param> -->
 <!--    <param type="string" name="QE_EM@Pdg=1000020040"> 2b_table-4He.txt </param> -->
 <!--    <param type="string" name="QE_EM@Pdg=1000020040"> int_table-4He.txt </param> -->
 <!--    <param type="string" name="QE_EM@Pdg=1000020040"> tot_nn_table-4He.txt </param> -->
-    <param type="string" name="QE_EM@Pdg=1000020040"> tot_pp_table-4He.txt </param>
+<!--    <param type="string" name="QE_EM@Pdg=1000020040"> tot_pp_table-4He.txt </param> -->
 
 <!-- Below this is February 2020 He3 without particle identity information -->
     <param type="string" name="QE_EM@Pdg=1000020030"> tot_table-3He.txt </param>

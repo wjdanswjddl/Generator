@@ -619,6 +619,9 @@ void QELKinematicsGeneratorSuSA::LoadConfig(void)
 double QELKinematicsGeneratorSuSA::ComputeMaxXSec(
                                        const Interaction * interaction) const
 {
+  // DEBUG!
+  return 2.95;
+
 // Computes the maximum differential cross section in the requested phase
 // space. This method overloads KineGeneratorWithCache::ComputeMaxXSec
 // method and the value is cached at a circular cache branch for retrieval

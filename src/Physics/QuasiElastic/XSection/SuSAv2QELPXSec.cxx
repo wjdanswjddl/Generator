@@ -82,8 +82,8 @@ double SuSAv2QELPXSec::XSec(const Interaction* interaction,
     //return LSXSec.XSec(interaction, kPSQ2fE);
   }
   else if ( A_request == 4 ) {
-    tensor_pdg = kPdgTgtC12;
-    Eb_tgt=fEbHe; Eb_ten=fEbC;
+    //tensor_pdg = kPdgTgtC12;
+    //Eb_tgt=fEbHe; Eb_ten=fEbC;
     // This is for helium 4, but use carbon tensor, may not be ideal ...
   }
   else if (A_request < 9) {

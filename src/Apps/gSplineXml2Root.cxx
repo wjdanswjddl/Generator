@@ -568,9 +568,11 @@ void SaveGraphsToRootFile(void)
   topdir = froot->mkdir(dptr.str().c_str(),dtitle.str().c_str());
   topdir->cd();
 
-  double   de = (gEmax-gEmin)/(kNSplineP-1);
+  double de = ( TMath::Log10(gEmax) - TMath::Log10(gEmin) ) / ( kNSplineP - 1 );
   double * e  = new double[kNSplineP];
-  for(int i=0; i<kNSplineP; i++) {  e[i]  = gEmin + i*de; }
+  for(int i=0; i<kNSplineP; i++) {
+    e[i] = TMath::Power(10., TMath::Log10(gEmin) + i * de);
+  }
 
   double * xs = new double[kNSplineP];
 
