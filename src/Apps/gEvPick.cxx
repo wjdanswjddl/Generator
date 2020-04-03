@@ -1,39 +1,38 @@
 //_____________________________________________________________________________________________
 /*!
-
 \program gevpick
 
-\brief   Reads a list of GENIE event files (GHEP format), `cherry-picks' events with a given 
+\brief   Reads a list of GENIE event files (GHEP format), `cherry-picks' events with a given
          topology and writes them out in a separate file. The output event tree contains two
          additional branches to aid book-keeping by maintaining a link to the source location
          of each cherry-picked event. For each such event we store a) the name of the original
          file and b) its original event number.
 
-         This is the _only_recommended_ way to obtain event files that contain specific final 
-         states (by cherry-picking events from files generated running GENIE in a comprehensive 
+         This is the _only_recommended_ way to obtain event files that contain specific final
+         states (by cherry-picking events from files generated running GENIE in a comprehensive
          mode). We don't recommend you attempt switching off generator-level reaction modes.
          No detector measures generator-level reaction modes like CCQE or NCRES.
          Detectors measure final states / topologies like {1mu-,0pi}, {1mu-,1pi+},
-         {0mu-, 1pi0}, {1 track, 1 shower}, {1 mu-like ring} etc depending on granularity, 
+         {0mu-, 1pi0}, {1 track, 1 shower}, {1 mu-like ring} etc depending on granularity,
          thresholds and PID capabilities.
          No final state / topology is a proxy for any particular reaction mode (and vice versa).
          Intranuclear re-scattering in particular causes significant migration between states
          (see Table 8.1 in the Physics and User manual).
          Examples:
-         - {1mu-,0pi} is mostly numuCCQE but this particular final state can also come about 
+         - {1mu-,0pi} is mostly numuCCQE but this particular final state can also come about
            by numu resonance production followed by pion absorption.
-         - numuCCQE yields mostly {1mu-,0pi} final states but occasionaly can yield {1mu-,1pi} 
+         - numuCCQE yields mostly {1mu-,0pi} final states but occasionaly can yield {1mu-,1pi}
            if the recoil nucleon re-interacts.
-         - NC1pi0 final states can be caused by all 
+         - NC1pi0 final states can be caused by all
            a) NC elastic followed by nucleon rescattering,
-           b) NC resonance neutrino-production, 
-           c) NC non-resonance background, 
+           b) NC resonance neutrino-production,
+           c) NC non-resonance background,
            d) low-W NC DIS
-           e) NC coherent scattering. 
+           e) NC coherent scattering.
            Each such NC1pi0 source contributes differently to the pion momentum distribution.
 
          Synopsis:
-           gevpick -i list_of_input_files -t topology  
+           gevpick -i list_of_input_files -t topology
                    [-o output_file]
                    [--message-thresholds xmfile]
                    [--event-record-print-level level]
@@ -42,37 +41,37 @@
 
            [] denotes an optional argument
 
-           -i 
+           -i
               Specify input file(s).
               Wildcards accepted, eg `-i "/data/genie/t2k/gntp.*.ghep.root"'
-           -t 
+           -t
               Specify event topology to cherry-pick.
               The input topology can be any of
-                - all 
+                - all
                     all (basically merges all files into one)
-                - numu_cc_1pip 
+                - numu_cc_1pip
                     numu CC with 1 \pi^{+} (and no other pion) in final state
-                - numu_cc_1pi0 
+                - numu_cc_1pi0
                     numu CC with 1 \pi^{0} (and no other pion) in final state
-                - numu_cc_1pim 
+                - numu_cc_1pim
                     numu CC with 1 \pi^{-} (and no other pion) in final state
-                - numu_nc_1pip    
+                - numu_nc_1pip
                     numu NC with 1 \pi^{+} (and no other pion) in final state
-                - numu_nc_1pi0    
+                - numu_nc_1pi0
                     numu NC with 1 \pi^{0} (and no other pion) in final state
-                - numu_nc_1pim    
+                - numu_nc_1pim
                     numu NC with 1 \pi^{-} (and no other pion) in final state
-                - numu_cc_hyperon 
-                    numu CC with at least one hyperon 
+                - numu_cc_hyperon
+                    numu CC with at least one hyperon
                     (\Sigma^{+,0,-}, \Lambda^{0}, \Xi^{0,-}, \Omega^{-}) in final state
-                - numubar_cc_hyperon 
-                    \bar{numu} CC with at least one hyperon 
+                - numubar_cc_hyperon
+                    \bar{numu} CC with at least one hyperon
                     (\Sigma^{+,0,-}, \Lambda^{0}, \Xi^{0,-}, \Omega^{-}) in final state
-                - cc_hyperon         
-                    any (anti)neutrino CC with at least one hyperon 
+                - cc_hyperon
+                    any (anti)neutrino CC with at least one hyperon
                     (\Sigma^{+,0,-}, \Lambda^{0}, \Xi^{0,-}, \Omega^{-}) in final state
                 - <can add more / please send request to costas.andreopoulos \at stfc.ac.uk>
-           -o 
+           -o
               Specify output filename.
               (optional, default: gntp.<topology>.ghep.root)
           --message-thresholds
@@ -87,8 +86,8 @@
 
            (1)  % gevpick -i "*.ghep.root" -t numu_nc_1pi0
 
-                Will read all events in all *.ghep.root files and will cherry-pick 
-                numu NC 1pi0 events. All cherry-picked events will be saved in the 
+                Will read all events in all *.ghep.root files and will cherry-pick
+                numu NC 1pi0 events. All cherry-picked events will be saved in the
                 output file gntp.numu_nc_1pi0.ghep.root (default name).
 
 \author  Costas Andreopoulos <costas.andreopoulos \at stfc.ac.uk>
@@ -180,7 +179,7 @@ void RunCherryPicker(void)
 {
   // Create an NtpWriter for writing out a tree with the cherry-picked events
   // Add 2 additional branches to the output event tree to save the original filename
-  // and the event number in the original file (so that all info can be traced back 
+  // and the event number in the original file (so that all info can be traced back
   // to its source).
 
   NtpWriter ntpw(kNFGHEP, 0);
@@ -200,7 +199,7 @@ void RunCherryPicker(void)
 
   TObjArray * file_array = gchain.GetListOfFiles();
   int nfiles = file_array->GetEntries();
-  LOG("gevpick", pFATAL) 
+  LOG("gevpick", pFATAL)
       << "Processing " << nfiles
       << (nfiles==1 ? " file " : " files ");
 
@@ -214,13 +213,13 @@ void RunCherryPicker(void)
   while (( chEl=(TChainElement*)next_file() )) {
 
      TFile fin(chEl->GetTitle(),"read");
-     TTree * ghep_tree = 
+     TTree * ghep_tree =
         dynamic_cast <TTree *> ( fin.Get("gtree")  );
 
      if(!ghep_tree) {
-        LOG("gevpick", pWARN) 
+        LOG("gevpick", pWARN)
            << "No GHEP tree found in " << chEl->GetTitle();
-        LOG("gevpick", pWARN) 
+        LOG("gevpick", pWARN)
            << "Skipping to next file...";
         continue;
      }
@@ -232,13 +231,13 @@ void RunCherryPicker(void)
        return;
      }
      Long64_t nmax = ghep_tree->GetEntries();
-     LOG("gevpick", pNOTICE) 
-        << "* Analyzing: " << nmax 
+     LOG("gevpick", pNOTICE)
+        << "* Analyzing: " << nmax
         << " events from GHEP tree in file: " << chEl->GetTitle();
 
-     NtpMCTreeHeader * thdr = 
+     NtpMCTreeHeader * thdr =
         dynamic_cast <NtpMCTreeHeader *> ( fin.Get("header") );
-     LOG("gevpick", pNOTICE) 
+     LOG("gevpick", pNOTICE)
           << "Input tree header: " << *thdr;
 
      //
@@ -254,8 +253,7 @@ void RunCherryPicker(void)
        if(AcceptEvent(event)) {
           brOrigFilename->SetString(chEl->GetTitle());
           brOrigEvtNum = iev;
-          EventRecord * event_copy = new EventRecord(event);
-          ntpw.AddEventRecord(iev_glob,event_copy);
+          ntpw.AddEventRecord(iev_glob, &event);
           iev_glob++;
        }
        mcrec->Clear();
@@ -265,7 +263,7 @@ void RunCherryPicker(void)
 
   // save the cherry-picked MC events
   ntpw.Save();
-  
+
   LOG("gevpick", pFATAL) << "Done!";
 }
 //____________________________________________________________________________________
@@ -429,7 +427,7 @@ void GetCommandLineArgs(int argc, char ** argv)
     exit(1);
   }
 
-  // get output file name 
+  // get output file name
   if( parser.OptionExists('o') ) {
     gOptOutFileName = parser.ArgAsString('o');
   } else {
@@ -439,7 +437,7 @@ void GetCommandLineArgs(int argc, char ** argv)
   }
 
   // Summarize
-  LOG("gevpick", pNOTICE) 
+  LOG("gevpick", pNOTICE)
     << "\n\n gevpick job info: "
     << "\n - input file(s)          : " << gOptInpFileNames
     << "\n - output file            : " << gOptOutFileName
@@ -460,7 +458,7 @@ string DefaultOutputFile(void)
   else if (gPickedTopology == kPtNumuNC1pim       ) { tp = "numu_nc_1pim";       }
   else if (gPickedTopology == kPtNumuCChyperon    ) { tp = "numu_cc_hyperon";    }
   else if (gPickedTopology == kPtNumubarCChyperon ) { tp = "numubar_cc_hyperon"; }
-  else if (gPickedTopology == kPtCChyperon        ) { tp = "cc_hyperon";         } 
+  else if (gPickedTopology == kPtCChyperon        ) { tp = "cc_hyperon";         }
 
   ostringstream fnm;
   fnm << "gntp." << tp << ".ghep.root";
