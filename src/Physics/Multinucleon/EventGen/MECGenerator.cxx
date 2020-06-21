@@ -594,6 +594,8 @@ void MECGenerator::SelectNSVLeptonKinematics (GHepRecord * event) const
   Kinematics * kinematics = interaction->KinePtr();
 
   double Enu = interaction->InitState().ProbeE(kRfHitNucRest);
+  double EnuLab = interaction->InitState().ProbeE(kRfLab);
+  LOG("MECGen", pERROR) << "Enu = " << Enu << ", EnuLab = " << EnuLab;
 
   int NuPDG = interaction->InitState().ProbePdg();
   int TgtPDG = interaction->InitState().TgtPdg();
