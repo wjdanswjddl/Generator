@@ -108,7 +108,8 @@ double STAPXSec::XSec(const Interaction* interaction,
 
   // Compute the differential cross section using the hadron tensor
   // (dsigma / dTl / dctl in GeV^{-3) / atom)
-  double xsec = tensor->dSigma_dT_dCosTheta( interaction, Q_value );
+  //double xsec = tensor->dSigma_dT_dCosTheta( interaction, Q_value );
+  double xsec = tensor->dSigma_dT_dCosTheta_rosenbluth( interaction, Q_value );
   // TODO: revisit this!
   if ( std::isnan(xsec) ||  xsec < 0. ) xsec = 0.;
   //LOG("STA", pERROR) << "Tl = " << Tl << ", ctl = " << costl;
