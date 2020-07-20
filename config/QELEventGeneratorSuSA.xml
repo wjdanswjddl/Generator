@@ -76,6 +76,14 @@ QEL-EbOR             bool     No         What Eb to use if fixed                
 
   </param_set>  
 
+  <param_set name="STA"> 
+
+    <!--  Extra stuff for STA -->
+    <!--  Q3 max for hadron tensors model    -->
+    <param type="double" name="QEL-Q3Max"> 2.0 </param>
+
+  </param_set>
+
   <param_set name="CC-Default">
 
   </param_set>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<alg_conf>
+
+<!-- Configuration for the STAHadronTensorModel algorithm.
+
+Configurable Parameters:
+.....................................................................................................
+Name               Type     Optional   Comment                          Default
+.....................................................................................................
+DataPath           string   No         Folder in which to look for the
+                                       hadron tensor table files
+
+DataPathType       string   Yes        Whether the specified path is    relative
+                                       absolute or relative to the
+                                       root GENIE folder
+-->
+
+  <param_set name="Default">
+
+    <param type="bool" name="WarnIfMissing"> false </param>
+
+    <param type="string" name="DataPath"> data/evgen/hadron_tensors/sta </param>
+    <param type="string" name="DataPathType"> relative </param>
+    <!-- Paths can be absolute or relative to the $GENIE folder -->
+    <!-- <param type="string" name="DataPathType"> relative </param> -->
+
+    <param type="string" name="QE_EM@Pdg=1000020040"> total_table_from_scaling-4He-2GeV.txt </param>
+    <!--<param type="string" name="QE_EM@Pdg=1000020040"> tot_table-4He.txt </param>-->
+
+  </param_set>
+
+</alg_conf>

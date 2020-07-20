@@ -15,5 +15,6 @@
 #pragma link C++ class genie::NievesMECHadronTensorModel;
 #pragma link C++ class genie::SuSAv2QELHadronTensorModel;
 #pragma link C++ class genie::SuSAv2MECHadronTensorModel;
+#pragma link C++ class genie::STAHadronTensorModel;
 
 #endif

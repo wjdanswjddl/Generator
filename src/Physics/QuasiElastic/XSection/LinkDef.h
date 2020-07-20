@@ -40,6 +40,7 @@
 #pragma link C++ class genie::QELXSec;
 #pragma link C++ class genie::NewQELXSec;
 
+#pragma link C++ class genie::STAPXSec;
 
 // Wrappers for GSL/MathMore lib
 #pragma link C++ class genie::utils::gsl::d2Xsec_dQ2dv;

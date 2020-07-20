@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<alg_conf>
+
+<!--
+Configuration for the STAPXSec xsec algorithm.
+
+Configurable Parameters:
+.....................................................................................................
+Name               Type     Optional   Comment                          Default
+.....................................................................................................
+XSec-Integrator    alg      No
+XSecScale          double   yes        XSec Scaling factor              1. 
+
+.....................................................................................................
+Parameters needed when Integrating with this model to generate splines:
+.....................................................................................................
+Name                                 Type     Optional   Comment 
+.....................................................................................................
+-->
+
+  <param_set name="Default"> 
+
+     <param type="double" name="XSecScale"> 1.000 </param>
+
+     <param type="alg"  name="HadronTensorAlg">  genie::STAHadronTensorModel/Default </param>
+
+     <!-- Using the MEC integrator rather than the QELXSec as we need to integrate in q0,q3 and not in Q2. -->
+     <param type="alg"  name="XSec-Integrator"> genie::MECXSec/Default </param>
+
+  </param_set>
+
+</alg_conf>
