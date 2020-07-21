@@ -142,7 +142,6 @@ double NievesSimoVacasMECPXSec2016::XSec(
     double Q0max = tensor_table[0]->XMax();
     double Q3min = tensor_table[0]->YMin();
     double Q3max = tensor_table[0]->YMax();
-    LOG("NievesMEC", pERROR) << "Q0min = " << Q0min << ", Q0max = " << Q0max << ", Q3min = " << Q3min << ", Q3max = " << Q3max;
     if(Q0 < Q0min || Q0 > Q0max || Q3 < Q3min || Q3 > Q3max) {
         return 0.0;
     }
