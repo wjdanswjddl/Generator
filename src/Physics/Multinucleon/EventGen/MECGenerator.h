@@ -72,6 +72,10 @@ private:
   // to the initial-state nucleons. This correction is
   // only applied when using the Valencia MEC model.
   QELEvGen_BindingMode_t fHitNucleonBindingMode;
+
+  // Flag that optionally disables Fermi motion for the
+  // Empirical MEC model
+  bool fDoFermiEmpirical;
 };
 
 }      // genie namespace

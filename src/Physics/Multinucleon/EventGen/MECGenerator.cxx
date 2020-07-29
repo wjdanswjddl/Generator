@@ -175,11 +175,17 @@ void MECGenerator::GenerateFermiMomentum(GHepRecord * event) const
   PDGCodeList pdgv = this->NucleonClusterConstituents(nucleon_cluster->Pdg());
   assert(pdgv.size()==2);
   tgt.SetHitNucPdg(pdgv[0]);
-  fNuclModel->GenerateNucleon(tgt);
-  TVector3 p3a = fNuclModel->Momentum3();
   tgt.SetHitNucPdg(pdgv[1]);
-  fNuclModel->GenerateNucleon(tgt);
-  TVector3 p3b = fNuclModel->Momentum3();
+
+  TVector3 p3a(0., 0., 0.);
+  TVector3 p3b(0., 0., 0.);
+
+  if ( fDoFermiEmpirical ) {
+    fNuclModel->GenerateNucleon(tgt);
+    p3a = fNuclModel->Momentum3();
+    fNuclModel->GenerateNucleon(tgt);
+    p3b = fNuclModel->Momentum3();
+  }
 
   LOG("FermiMover", pINFO)
      << "1st nucleon (code = " << pdgv[0] << ") generated momentum: ("
@@ -1100,6 +1106,9 @@ void MECGenerator::LoadConfig(void)
     GetParamDef( "NSVHitNucleonBindingMode", binding_mode, std::string("UseNuclearModel") );
 
     fHitNucleonBindingMode = genie::utils::StringToQELBindingMode( binding_mode );
+
+    // Optionally deactivate Fermi motion for the Empirical MEC model
+    GetParamDef( "DoFermiMotionForEmpiricalMEC", fDoFermiEmpirical, true );
 }
 //___________________________________________________________________________
 
