@@ -22,6 +22,8 @@ NSV-Q3Max        double   No         Q3 max for 2p2h model                      
     <!-- Binding energy correction currently only applied to the Valencia MEC model -->
     <param type="string" name="NSVHitNucleonBindingMode"> UseNuclearModel </param>
 
+    <param type="bool" name="DoFermiMotionForEmpiricalMEC"> false </param>
+
   </param_set>
 
   <param_set name="UGSR">
