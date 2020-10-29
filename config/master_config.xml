@@ -66,6 +66,7 @@
    <config alg="genie::CEvNSEventGenerator">             CEvNSEventGenerator.xml             </config>
    <config alg="genie::COHDNuEventGenerator">            COHDNuEventGenerator.xml            </config>
    <config alg="genie::QELEventGeneratorSuSA">           QELEventGeneratorSuSA.xml           </config>
+   <config alg="genie::QELEventGeneratorGCF">           QELEventGeneratorGCF.xml           </config>
    <config alg="genie::NucleonDecayPrimaryVtxGenerator"> NucleonDecayPrimaryVtxGenerator.xml </config>
    <config alg="genie::NNBarOscPrimaryVtxGenerator">     NNBarOscPrimaryVtxGenerator.xml     </config>
    <config alg="genie::SpectralFunction2p2h">        SpectralFunction2p2h.xml        </config>

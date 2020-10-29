@@ -13,5 +13,6 @@
 #pragma link C++ class genie::QELEventGeneratorSuSA;
 #pragma link C++ class genie::QELEventGenerator;
 #pragma link C++ class genie::QELEventGeneratorSM;
+#pragma link C++ class genie::QELEventGeneratorGCF;
 
 #endif

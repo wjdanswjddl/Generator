@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Configuration for the QELEventGeneratorGCF EventRecordVisitorI
+
+-->
+
+<alg_conf>
+
+  <param_set name="Default"> 
+    <param type="string" name="EventsFile">/uboone/app/users/sfehlber/GCF_CCQE.root</param>
+  </param_set>
+
+</alg_conf>
+
