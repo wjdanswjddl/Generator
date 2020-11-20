@@ -21,6 +21,7 @@
 #include <TRootIOCtor.h>
 
 #include "Framework/Interaction/InitialState.h"
+#include "Framework/Interaction/InteractionException.h"
 #include "Framework/Messenger/Messenger.h"
 #include "Framework/ParticleData/PDGLibrary.h"
 #include "Framework/ParticleData/PDGUtils.h"
@@ -292,21 +293,27 @@ TLorentzVector * InitialState::GetTgtP4(RefFrame_t ref_frame) const
        //------------------ STRUCK NUCLEON REST FRAME:
        case (kRfHitNucRest) :
        {
-             // make sure that 'struck nucleon' properties were set in
-             // the nuclear target object
-             assert(fTgt->HitNucIsSet());
-             TLorentzVector * pnuc4 = fTgt->HitNucP4Ptr();
+             LOG("Interaction", pFATAL) << "Due to off-shellness, use of"
+               << "kRfHitNucRest with genie::InitialState::GetTgtP4"
+               << "is deprecated";
+             throw genie::exceptions::InteractionException("Deprecated frame request");
 
-             // compute velocity vector (px/E, py/E, pz/E)
-             double bx = pnuc4->Px() / pnuc4->Energy();
-             double by = pnuc4->Py() / pnuc4->Energy();
-             double bz = pnuc4->Pz() / pnuc4->Energy();
+             //// make sure that 'struck nucleon' properties were set in
+             //// the nuclear target object
+             //assert(fTgt->HitNucIsSet());
+             //TLorentzVector * pnuc4 = fTgt->HitNucP4Ptr();
 
-             // BOOST
-             TLorentzVector * p4 = new TLorentzVector(*fTgtP4);
-             p4->Boost(-bx,-by,-bz);
+             //// compute velocity vector (px/E, py/E, pz/E)
+             //double bx = pnuc4->Px() / pnuc4->Energy();
+             //double by = pnuc4->Py() / pnuc4->Energy();
+             //double bz = pnuc4->Pz() / pnuc4->Energy();
 
-             return p4;
+             //// BOOST
+             //TLorentzVector * p4 = new TLorentzVector(*fTgtP4);
+             //p4->Boost(-bx,-by,-bz);
+
+             //return p4;
+
              break;
        }
        //------------------ LAB:
@@ -317,7 +324,7 @@ TLorentzVector * InitialState::GetTgtP4(RefFrame_t ref_frame) const
              break;
        }
        default:
-             LOG("Interaction", pERROR) << "Uknown reference frame";
+             LOG("Interaction", pERROR) << "Unknown reference frame";
   }
   return 0;
 }
@@ -343,26 +350,31 @@ TLorentzVector * InitialState::GetProbeP4(RefFrame_t ref_frame) const
        //------------------ STRUCK NUCLEON REST FRAME:
        case (kRfHitNucRest) :
        {
-             // make sure that 'struck nucleon' properties were set in
-             // the nuclear target object
+             LOG("Interaction", pFATAL) << "Due to off-shellness, use of"
+               << "kRfHitNucRest with genie::InitialState::GetProbeP4"
+               << "is deprecated";
+             throw genie::exceptions::InteractionException("Deprecated frame request");
 
-             assert( fTgt->HitNucP4Ptr() != 0 );
+             //// make sure that 'struck nucleon' properties were set in
+             //// the nuclear target object
 
-             TLorentzVector * pnuc4 = fTgt->HitNucP4Ptr();
+             //assert( fTgt->HitNucP4Ptr() != 0 );
 
-             // compute velocity vector (px/E, py/E, pz/E)
+             //TLorentzVector * pnuc4 = fTgt->HitNucP4Ptr();
 
-             double bx = pnuc4->Px() / pnuc4->Energy();
-             double by = pnuc4->Py() / pnuc4->Energy();
-             double bz = pnuc4->Pz() / pnuc4->Energy();
+             //// compute velocity vector (px/E, py/E, pz/E)
 
-             // BOOST
+             //double bx = pnuc4->Px() / pnuc4->Energy();
+             //double by = pnuc4->Py() / pnuc4->Energy();
+             //double bz = pnuc4->Pz() / pnuc4->Energy();
 
-             TLorentzVector * p4 = new TLorentzVector(*fProbeP4);
+             //// BOOST
 
-             p4->Boost(-bx,-by,-bz);
+             //TLorentzVector * p4 = new TLorentzVector(*fProbeP4);
 
-             return p4;
+             //p4->Boost(-bx,-by,-bz);
+
+             //return p4;
 
              break;
        }
@@ -376,18 +388,55 @@ TLorentzVector * InitialState::GetProbeP4(RefFrame_t ref_frame) const
        }
        default:
 
-             LOG("Interaction", pERROR) << "Uknown reference frame";
+             LOG("Interaction", pERROR) << "Unknown reference frame";
   }
   return 0;
 }
 //___________________________________________________________________________
 double InitialState::ProbeE(RefFrame_t ref_frame) const
 {
-  TLorentzVector * p4 = this->GetProbeP4(ref_frame);
-  double E = p4->Energy();
+  switch ( ref_frame ) {
 
-  delete p4;
-  return E;
+    // Assume here that the target nucleus is always at rest
+    // (hence target rest frame == lab frame )
+    case ( kRfLab ) :
+    case ( kRfTgtRest ) :
+    {
+      return fProbeP4->E();
+      break;
+    }
+    case ( kRfHitNucRest ) :
+    {
+      // Avoid an unnecessary boost by working with the 4-momenta of the probe
+      // and hit nucleon in the lab frame
+      TLorentzVector nucP4 = fTgt->HitNucP4();
+      TLorentzVector sumP4 = *fProbeP4 + nucP4;
+
+      // Square of the probe mass
+      double mv2 = fProbeP4->M2();
+
+      // Struck nucleon mass (possibly off-shell)
+      double M = nucP4.M();
+
+      // Mandelstam s
+      double s = sumP4.Dot( sumP4 ); // dot product with itself
+
+      // Probe energy in the hit nucleon rest frame
+      double Ev = ( s - mv2 - M*M ) / ( 2. * M );
+
+      return Ev;
+      break;
+    }
+
+    default:
+    {
+      LOG("Interaction", pFATAL) << "Unknown reference frame";
+      throw genie::exceptions::InteractionException("Unknown reference frame");
+      break;
+    }
+
+  }
+  return 0.;
 }
 
 //___________________________________________________________________________

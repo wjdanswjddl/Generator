@@ -92,9 +92,8 @@ void SKKinematicsGenerator::CalculateKin_AtharSingleKaon(GHepRecord * evrec) con
   int leppdg = interaction->FSPrimLeptonPdg();
   const TLorentzVector pnuc4 = interaction->InitState().Tgt().HitNucP4(); // 4-momentum of struck nucleon in lab frame
   TVector3 beta = pnuc4.BoostVector();
-  TLorentzVector P4_nu = *(interaction->InitStatePtr()->GetProbeP4(kRfHitNucRest)); // struck nucleon rest frame
 
-  double enu = P4_nu.E(); // in nucleon rest frame
+  double enu = interaction->InitState().ProbeE( kRfHitNucRest ); // in nucleon rest frame
   int kaon_pdgc = interaction->ExclTag().StrangeHadronPdg();
   double mk = PDGLibrary::Instance()->Find(kaon_pdgc)->Mass();
   double ml = PDGLibrary::Instance()->Find(leppdg)->Mass();
@@ -170,18 +169,30 @@ void SKKinematicsGenerator::CalculateKin_AtharSingleKaon(GHepRecord * evrec) con
      interaction->KinePtr()->SetKV(kKVctl, costhetal);
      interaction->KinePtr()->SetKV(kKVphikq, phikq);
 
-     // lorentz invariant stuff, but do all the calculations in the nucleon rest frame
+     // Do these calculations in the nucleon rest frame
      double el = tl + ml;
      double pl = TMath::Sqrt(el*el - ml*ml);
-     double M = interaction->InitState().Tgt().Mass();
+     double M = pnuc4.M();
      TVector3 lepton_3vector = TVector3(0,0,0);
      lepton_3vector.SetMagThetaPhi(pl,TMath::ACos(costhetal),0.0);
      TLorentzVector P4_lep( lepton_3vector, tl+ml );
+     // Energy transfer (in hit nucleon rest frame)
+     double q0 = enu - P4_lep.E();
+
+     // Now boost back to the lab frame to get the 4-momentum transfer
+     P4_lep.Boost( beta );
+     TLorentzVector* ptr_P4_nu = interaction->InitState().GetProbeP4( kRfLab );
+     TLorentzVector P4_nu = *ptr_P4_nu;
+     delete ptr_P4_nu;
+
      TLorentzVector q = P4_nu - P4_lep;
+
+     // Compute Lorentz invariant quantities, using the hit nucleon rest frame
+     // in some cases for convenience
      double Q2 = -q.Mag2();
-     double xbj = Q2/(2*M*q.E());
-     double y = q.E()/P4_nu.E();
-     double W2 = (pnuc4+q).Mag2();
+     double xbj = Q2 / ( 2.*M*q0 );
+     double y = q0 / enu;
+     double W2 = ( pnuc4 + q ).Mag2();
 
 
      // computing cross section for the current kinematics

@@ -18,7 +18,7 @@
 \created  May 02, 2004
 
 \cpright  Copyright (c) 2003-2020, The GENIE Collaboration
-          For the full text of the license visit http://copyright.genie-mc.org          
+          For the full text of the license visit http://copyright.genie-mc.org
 */
 //____________________________________________________________________________
 
@@ -66,7 +66,7 @@ public:
   const Target &   Tgt        (void) const { return *fTgt; }
   Target *         TgtPtr     (void) const { return  fTgt; }
   TLorentzVector * GetTgtP4   (RefFrame_t rf = kRfLab) const;
-  TLorentzVector * GetProbeP4 (RefFrame_t rf = kRfHitNucRest) const;
+  TLorentzVector * GetProbeP4 (RefFrame_t rf = kRfLab) const;
   double           ProbeE     (RefFrame_t rf) const;
   double           CMEnergy   () const; ///< centre-of-mass energy (sqrt s)
 

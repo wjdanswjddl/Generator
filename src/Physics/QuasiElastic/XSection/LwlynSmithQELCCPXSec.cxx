@@ -183,9 +183,7 @@ double LwlynSmithQELCCPXSec::FullDifferentialXSec(const Interaction*  interactio
     if ( pNf < kF ) return 0.;
   }
 
-  // Note that GetProbeP4 defaults to returning the probe 4-momentum in the
-  // struck nucleon rest frame, so we have to explicitly ask for the lab frame
-  // here
+  // Get the probe 4-momentum in the lab frame
   TLorentzVector * tempNeutrino = init_state.GetProbeP4(kRfLab);
   TLorentzVector neutrinoMom = *tempNeutrino;
   delete tempNeutrino;
