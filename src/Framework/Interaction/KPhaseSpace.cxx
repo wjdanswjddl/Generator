@@ -84,118 +84,148 @@ double KPhaseSpace::Threshold(void) const
   const XclsTag &      xcls       = fInteraction->ExclTag();
   const Target &       tgt        = init_state.Tgt();
 
+  double mv = fInteraction->InitState().Probe()->Mass();
   double ml = fInteraction->FSPrimLepton()->Mass();
 
-  if (pi.IsSingleKaon()) {
-    int kaon_pdgc = xcls.StrangeHadronPdg();
-    double Mi   = tgt.HitNucP4Ptr()->M(); // initial nucleon mass
-    // Final nucleon can be different for K0 interaction
-    double Mf = (xcls.NProtons()==1) ? kProtonMass : kNeutronMass;
-    double mk   = PDGLibrary::Instance()->Find(kaon_pdgc)->Mass();
-  //double ml   = PDGLibrary::Instance()->Find(fInteraction->FSPrimLeptonPdg())->Mass();
-    double mtot = ml + mk + Mf; // total mass of FS particles
-    double Ethresh = (mtot*mtot - Mi*Mi)/(2. * Mf);
-    return Ethresh;
+  // Trivially zero-threshold scattering types go here
+  if ( pi.IsCoherentElastic()            ||
+       pi.IsNuElectronElastic()          ||
+       pi.IsDarkMatterElectronElastic()  ||
+       pi.IsAMNuGamma() )
+  {
+    return 0.;
   }
 
-  if(pi.IsCoherentElastic()) {
-    return 0;
+  // Trivial threshold for hadronic-tensor-based MEC models
+  if ( pi.IsMEC() && !tgt.HitNucIsSet() ) {
+    // this was ... if (pi.IsMECTensor())
+    return ml;
   }
 
-  if (pi.IsCoherentProduction()) {
+  // Scattering types involving a single nucleon
+  // (which may be bound within a complex nuclear
+  // target) go here
+  if ( pi.IsQuasiElastic()            ||
+       pi.IsDarkMatterElastic()       ||
+       pi.IsInverseBetaDecay()        ||
+       pi.IsResonant()                ||
+       pi.IsDeepInelastic()           ||
+       pi.IsDarkMatterDeepInelastic() ||
+       pi.IsDiffractive()             ||
+       pi.IsMEC()                     ||
+       pi.IsSingleKaon() )
+  {
+    // Mass of the nuclear target
+    double Mtgt = tgt.Mass();
 
-    int tgtpdgc = tgt.Pdg(); // nuclear target PDG code (10LZZZAAAI)
-    double MA   = PDGLibrary::Instance()->Find(tgtpdgc)->Mass();
+    // In reactions on complex nuclei (i.e., nuclear targets that are not free
+    // nucleons), we need to account for the mass of the nuclear remnant when
+    // computing the reaction threshold in the lab frame.
+    double Mremnant = 0.;
+    if ( tgt.IsNucleus() ) {
 
-    double m_other  = controls::kASmallNum ;
-    // as a default the mass of hadronic system is the mass of the photon.
-    // which is assumed to be a small number to avoid divergences
+      assert( tgt.HitNucIsSet() );
+
+      // Struck nucleon total energy (possibly off the mass shell)
+      double ENi = tgt.HitNucP4().M();
+
+      // Spectator nuclear remnant has a 3-momentum equal and opposite to the
+      // initial-state struck nucleon
+      TVector3 p3remnant = -1. * tgt.HitNucP4().Vect();
+
+      TLorentzVector p4remnant( p3remnant, Mtgt - ENi );
+
+      Mremnant = p4remnant.M();
+    }
+
+    double Wmin = kNucleonMass + kPionMass;
+
+    if ( pi.IsQuasiElastic()      ||
+         pi.IsMEC()               ||
+         pi.IsDarkMatterElastic() ||
+         pi.IsInverseBetaDecay()  ||
+         pi.IsDarkMatterElastic() ||
+         pi.IsDarkMatterDeepInelastic() )
+    {
+      Wmin = fInteraction->RecoilNucleon()->Mass();
+    }
+
+    if ( pi.IsResonant() )
+    {
+      Wmin = kNucleonMass + kPhotontest;
+    }
+
+    if ( pi.IsSingleKaon() ) {
+      int kaon_pdgc = xcls.StrangeHadronPdg();
+
+      // Final nucleon can be different for K0 interaction
+      double mNf = ( xcls.NProtons() == 1 ) ? kProtonMass : kNeutronMass;
+      double mk = PDGLibrary::Instance()->Find( kaon_pdgc )->Mass();
+
+      Wmin = mk + mNf;
+    }
+
+    if ( xcls.IsCharmEvent() ) {
+      if ( xcls.IsInclusiveCharm() ) {
+        Wmin = kNucleonMass + kLightestChmHad;
+      }
+      else {
+        int cpdg = xcls.CharmHadronPdg();
+        double mchm = PDGLibrary::Instance()->Find( cpdg )->Mass();
+        if ( pi.IsQuasiElastic() || pi.IsInverseBetaDecay() ) {
+          Wmin = mchm + controls::kASmallNum;
+        }
+        else {
+          Wmin = kNeutronMass + mchm + controls::kASmallNum;
+        }
+      } // inclusive?
+    } // charm?
+
+    // Total energy of the probe + target system in the CM frame at threshold
+    double Etot_CM_min = ml + Wmin + Mremnant;
+
+    // Value of Mandelstam s at threshold for the probe + target system
+    double smin = std::pow( Etot_CM_min, 2 );
+
+    // Threshold probe total energy in the lab frame
+    double Ethr = 0.5 * ( smin - mv*mv - Mtgt*Mtgt ) / Mtgt;
+    return std::max( 0., Ethr );
+  }
+
+  // Scattering types involving the target nucleus as a whole go here
+  if ( pi.IsCoherentProduction() ) {
+
+    // For coherent interactions, the masses of the nuclear remnant and the
+    // target are the same
+    double Mtgt = tgt.Mass();
+    double Mremnant = Mtgt;
+
+    // As a default the mass of hadronic system is the mass of the photon. This
+    // is assumed to be a small number to avoid divergences
+    double Wmin = controls::kASmallNum ;
 
     if ( xcls.NPions() > 0 ) {
-      m_other = pi.IsWeakCC() ? kPionMass : kPi0Mass;
+      Wmin = pi.IsWeakCC() ? kPionMass : kPi0Mass;
     }
 
-    double m    = ml + m_other ;
-    double m2   = TMath::Power(m,2);
-    double Ethr = m + 0.5*m2/MA;
+    // Total energy of the probe + target system in the CM frame at threshold
+    double Etot_CM_min = ml + Wmin + Mremnant;
 
-    return TMath::Max(0.,Ethr);
+    // Value of Mandelstam s at threshold for the probe + target system
+    double smin = std::pow( Etot_CM_min, 2 );
+
+    // Threshold probe total energy in the lab frame
+    double Ethr = 0.5 * ( smin - mv*mv - Mtgt*Mtgt ) / Mtgt;
+    return std::max( 0., Ethr );
+
   }
 
-  if(pi.IsQuasiElastic()            ||
-     pi.IsDarkMatterElastic()       ||
-     pi.IsInverseBetaDecay()        ||
-     pi.IsResonant()                ||
-     pi.IsDeepInelastic()           ||
-     pi.IsDarkMatterDeepInelastic() ||
-     pi.IsDiffractive())
-  {
-    assert(tgt.HitNucIsSet());
-    double Mn   = tgt.HitNucP4Ptr()->M();
-    double Mn2  = TMath::Power(Mn,2);
-    double Wmin = kNucleonMass + kPionMass;
-    if ( pi.IsQuasiElastic() || pi.IsDarkMatterElastic() || pi.IsInverseBetaDecay() ) {
-      int finalNucPDG = tgt.HitNucPdg();
-      if ( pi.IsWeakCC() ) finalNucPDG = pdg::SwitchProtonNeutron( finalNucPDG );
-      Wmin = PDGLibrary::Instance()->Find( finalNucPDG )->Mass();
-    }
-    if (pi.IsResonant()) {
-        Wmin = kNucleonMass + kPhotontest;
-    }
-
-    if(xcls.IsCharmEvent()) {
-       if(xcls.IsInclusiveCharm()) {
-          Wmin = kNucleonMass+kLightestChmHad;
-       } else {
-          int cpdg = xcls.CharmHadronPdg();
-          double mchm = PDGLibrary::Instance()->Find(cpdg)->Mass();
-          if(pi.IsQuasiElastic() || pi.IsInverseBetaDecay()) {
-            Wmin = mchm + controls::kASmallNum;
-          }
-          else {
-            Wmin = kNeutronMass + mchm + controls::kASmallNum;
-          }
-       }//incl.?
-    }//charm?
-
-    double smin = TMath::Power(Wmin+ml,2.);
-    double Ethr = 0.5*(smin-Mn2)/Mn;
-    // threshold is different for dark matter case
-    if(pi.IsDarkMatterElastic() || pi.IsDarkMatterDeepInelastic()) {
-      // Correction to minimum kinematic variables
-      Wmin = Mn;
-      smin = TMath::Power(Wmin+ml,2);
-      Ethr = TMath::Max(0.5*(smin-Mn2-ml*ml)/Mn,ml);
-    }
-
-    return TMath::Max(0.,Ethr);
-  }
-
-  if(pi.IsInverseMuDecay() || pi.IsIMDAnnihilation()) {
+  // TODO: finish refactoring these (non-nuclear interactions)
+  if ( pi.IsInverseMuDecay() || pi.IsIMDAnnihilation() ) {
     double Ethr = 0.5 * (kMuonMass2-kElectronMass2)/kElectronMass;
     return TMath::Max(0.,Ethr);
   }
 
-  if(pi.IsNuElectronElastic() || pi.IsDarkMatterElectronElastic()) {
-    return 0;
-  }
-  if(pi.IsAMNuGamma()) {
-    return 0;
-  }
-  if (pi.IsMEC()) {
-    if (tgt.HitNucIsSet()) {
-        double Mn   = tgt.HitNucP4Ptr()->M();
-        double Mn2  = TMath::Power(Mn,2);
-        double Wmin = fInteraction->RecoilNucleon()->Mass(); // mass of the recoil nucleon cluster
-        double smin = TMath::Power(Wmin+ml,2.);
-        double Ethr = 0.5*(smin-Mn2)/Mn;
-        return TMath::Max(0.,Ethr);
-    }
-    else {
-        // this was ... if (pi.IsMECTensor())
-        return ml;
-    }
-  }
   if(pi.IsGlashowResonance()) {
     double Ethr = 0.5 * (ml*ml-kElectronMass2)/kElectronMass;
     return TMath::Max(0.,Ethr);
@@ -245,39 +275,11 @@ double KPhaseSpace::Maximum(KineVar_t kvar) const
 //___________________________________________________________________________
 bool KPhaseSpace::IsAboveThreshold(void) const
 {
-  double E    = 0.;
+  double E = fInteraction->InitState().ProbeE( kRfLab );
   double Ethr = this->Threshold();
 
-  const ProcessInfo &  pi         = fInteraction->ProcInfo();
-  const InitialState & init_state = fInteraction->InitState();
-
-  if (pi.IsCoherentElastic()    ||
-      pi.IsCoherentProduction() ||
-      pi.IsInverseMuDecay()     ||
-      pi.IsIMDAnnihilation()    ||
-      pi.IsNuElectronElastic()  ||
-      pi.IsDarkMatterElectronElastic() ||
-      pi.IsMEC()                ||
-      pi.IsGlashowResonance())
-  {
-      E = init_state.ProbeE(kRfLab);
-  }
-
-  if(pi.IsQuasiElastic()            ||
-     pi.IsDarkMatterElastic()       ||
-     pi.IsInverseBetaDecay()        ||
-     pi.IsResonant()                ||
-     pi.IsDeepInelastic()           ||
-     pi.IsDarkMatterDeepInelastic() ||
-     pi.IsDiffractive()             ||
-     pi.IsSingleKaon()              ||
-     pi.IsAMNuGamma())
-  {
-      E = init_state.ProbeE(kRfHitNucRest);
-  }
-
   LOG("KPhaseSpace", pDEBUG) << "E = " << E << ", Ethr = " << Ethr;
-  return (E>Ethr);
+  return ( E > Ethr );
 }
 //___________________________________________________________________________
 bool KPhaseSpace::IsAllowed(void) const
