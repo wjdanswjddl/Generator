@@ -400,8 +400,11 @@ double genie::utils::mec::GetMaxXSecTlctl( const XSecAlgorithmI& xsec_model,
         double plep = std::sqrt( std::max(0., std::pow(T + LepMass, 2)
           - LepMass*LepMass) );
 
-        double Costh = ( 2.*Enu*Elep - ProbeMass*ProbeMass - LepMass*LepMass
-          - Q2 ) / ( 2. * pnu * plep );
+        double Costh = 1.;
+        if ( pnu != 0. && plep != 0. ) {
+          Costh = ( 2.*Enu*Elep - ProbeMass*ProbeMass - LepMass*LepMass
+            - Q2 ) / ( 2. * pnu * plep );
+        }
         // Respect the bounds of the cosine function.
         Costh = std::min( std::max(-1., Costh), 1. );
 
