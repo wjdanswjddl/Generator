@@ -208,6 +208,9 @@ genie::QELEvGen_BindingMode_t genie::utils::StringToQELBindingMode(
   else if ( binding_mode == "ValenciaStyleQValue" ) {
     return kValenciaStyleQValue;
   }
+  else if ( binding_mode == "OnShellPauliBlock" ) {
+    return kOnShellPauliBlock;
+  }
   else {
     LOG("QELEvent", pFATAL) << "Unrecognized setting \"" << binding_mode
       << "\" requested in genie::utils::StringToQELBindingMode()";
@@ -276,8 +279,9 @@ void genie::utils::BindHitNucleon(genie::Interaction& interaction,
   // the selected binding energy mode. Always put the initial nucleon
   // on shell if it is not part of a composite nucleus
   double ENi = 0.;
-  if ( tgt->IsNucleus() && hitNucleonBindingMode != genie::kOnShell ) {
-
+  if ( tgt->IsNucleus() && hitNucleonBindingMode != genie::kOnShell
+    && hitNucleonBindingMode != genie::kOnShellPauliBlock )
+  {
     // For a nuclear target with a bound initial struck nucleon, take binding
     // energy effects and Pauli blocking into account when computing QE
     // differential cross sections
@@ -413,7 +417,8 @@ void genie::utils::BindHitNucleon(genie::Interaction& interaction,
   }
   else {
     // Keep the struck nucleon on shell either because
-    // hitNucleonBindingMode == kOnShell or because
+    // hitNucleonBindingMode == kOnShell,
+    // hitNucleonBindingMode == kOnShellPauliBlock, or because
     // the target is a single nucleon
     ENi = std::sqrt( p3Ni.Mag2() + std::pow(mNi, 2) );
     Eb = 0.;
@@ -422,7 +427,9 @@ void genie::utils::BindHitNucleon(genie::Interaction& interaction,
     // binding mode, set the "assume free nucleon" flag. This turns off
     // Pauli blocking and the requirement that q0 > 0 in the QE cross section
     // models (an on-shell nucleon *is* a free nucleon)
-    if ( tgt->IsNucleus() ) interaction.SetBit( kIAssumeFreeNucleon );
+    if ( tgt->IsNucleus() && hitNucleonBindingMode == kOnShell ) {
+      interaction.SetBit( kIAssumeFreeNucleon );
+    }
   }
 
   LOG( "QELEvent", pDEBUG ) << "Eb = " << Eb << ", pNi = " << p3Ni.Mag()

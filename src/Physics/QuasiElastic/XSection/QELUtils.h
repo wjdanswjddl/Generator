@@ -47,6 +47,9 @@ namespace genie {
     // the effective energy transfer implies an off-shell hit nucleon
     // total energy in the initial state.
     kValenciaStyleQValue,
+
+    // On shell nucleon with Pauli blocking
+    kOnShellPauliBlock,
   } QELEvGen_BindingMode_t;
 
   namespace utils {
