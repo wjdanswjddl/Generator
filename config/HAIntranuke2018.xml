@@ -53,6 +53,8 @@ DelRNucleon         double  Yes   mult. factor for nucleon de-Broglie wavelength
     <param type="double" name="HAINUKE-DelRPion">        0.0   </param>
     <param type="double" name="HAINUKE-DelRNucleon">     0.0   </param>
 
+    <param type="double" name="FSI-Nucleon-MFPScale">    1.400 </param>
+
     <!-- Knobs for tuning -->
     <!-- Note that now all these parameters are not mandatory and their default is 1
          they are reported just to inform the user what can be tweaked -->
