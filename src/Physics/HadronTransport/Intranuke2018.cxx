@@ -91,6 +91,41 @@ using namespace genie::utils;
 using namespace genie::constants;
 using namespace genie::controls;
 
+namespace {
+
+  int get_particle_A( int pdg ) {
+    bool is_nucleon = genie::pdg::IsNucleon( pdg );
+    if ( is_nucleon ) return 1;
+    bool is_ion = genie::pdg::IsIon( pdg );
+    int A = 0;
+    if ( is_ion ) {
+      A = genie::pdg::IonPdgCodeToA( pdg );
+    }
+    return A;
+  }
+
+  void tally_AQ( const genie::GHepRecord& event, const genie::GHepParticle& p,
+    int& A, int& Q )
+  {
+    LOG( "Intranuke2018", pNOTICE ) << "Checking particle " << p.Name();
+    int first_daughter_idx = p.FirstDaughter();
+    if ( first_daughter_idx < 0 ) return;
+    int last_daughter_idx = p.LastDaughter();
+    for ( int idx = first_daughter_idx; idx <= last_daughter_idx; ++idx ) {
+      genie::GHepParticle* d = event.Particle( idx );
+      LOG( "Intranuke2018", pNOTICE ) << "Had daughter " << d->Name();
+      if ( d->Status() == genie::kIStStableFinalState ) {
+        int dA = get_particle_A( d->Pdg() );
+        int dQ = d->Charge();
+        A += dA;
+        Q += dQ;
+      }
+      tally_AQ( event, *d, A, Q );
+    }
+  }
+
+};
+
 //___________________________________________________________________________
 Intranuke2018::Intranuke2018() :
 EventRecordVisitorI()
@@ -333,6 +368,9 @@ void Intranuke2018::TransportHadrons(GHepRecord * evrec) const
        continue; // <-- skip to next GHEP entry
     }
 
+    int temp_RemnA = fRemnA;
+    int temp_RemnZ = fRemnZ;
+
     // Start stepping particle out of the nucleus
     bool has_interacted = false;
     while ( this-> IsInNucleus(sp) )
@@ -374,6 +412,55 @@ void Intranuke2018::TransportHadrons(GHepRecord * evrec) const
 
     // Current snapshot
     //LOG("Intranuke2018", pINFO) << "Current event record snapshot: " << *evrec;
+
+    LOG( "Intranuke2018", pNOTICE ) << "myDEBUG start A = " << temp_RemnA << " = " << fRemnA;
+    LOG( "Intranuke2018", pNOTICE ) << "myDEBUG start Z = " << temp_RemnZ << " = " << fRemnZ;
+
+    int myA = 0;
+    int myQ = 0;
+    tally_AQ( *evrec, *p, myA, myQ );
+
+    int delta_A = get_particle_A( p->Pdg() ) - myA;
+    int delta_Z = ( p->Charge() - myQ ) / 3;
+
+    // Deal with apparent charge conservation issues in the absorption fate.
+    // Note that some failure modes for "too few nucleon" cases appear to yield
+    // irrecoverable changes to (A, Z).
+    if ( p->RescatterCode() == genie::kIHAFtAbs ) {
+
+      if ( p->Pdg() == genie::kPdgPiM ) {
+        int daught = p->FirstDaughter();
+        int d_pdg = evrec->Particle( daught )->Pdg();
+        // If the first daughter is a nucleon cluster, then a multinucleon
+        // absorption reaction was simulated which doesn't suffer from the
+        // charge conservation issue. If the first daughter is a pi minus,
+        // then the absorption simulation failed and terminated early.
+        if ( d_pdg != genie::kPdgCompNuclCluster
+          && d_pdg != genie::kPdgPiM ) delta_Z--;
+      }
+
+      else if ( p->Pdg() == genie::kPdgKP ) {
+        int daught = p->FirstDaughter();
+        if ( evrec->Particle(daught)->Pdg()
+          == genie::kPdgCompNuclCluster )
+        {
+          delta_Z++;
+        }
+      }
+    }
+
+    temp_RemnA += delta_A;
+    temp_RemnZ += delta_Z;
+
+    LOG( "Intranuke2018", pNOTICE ) << "myDEBUG end A = " << temp_RemnA << " = " << fRemnA;
+    LOG( "Intranuke2018", pNOTICE ) << "myDEBUG end Z = " << temp_RemnZ << " = " << fRemnZ;
+    if ( temp_RemnA != fRemnA || temp_RemnZ != fRemnZ ) {
+      LOG( "Intranuke2018", pERROR ) << *evrec;
+      //if ( p->RescatterCode() != genie::kIHAFtAbs ) {
+      assert( temp_RemnA == fRemnA );
+      assert( temp_RemnZ == fRemnZ );
+      //}
+    }
 
   }// GHEP entries
 
