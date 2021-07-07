@@ -19,7 +19,6 @@
 #include "Math/IFunction.h"
 #include "Math/Integrator.h"
 
-#include "Physics/QuasiElastic/XSection/FortranWrapperQELPXSec.h"
 #include "Physics/QuasiElastic/XSection/QELUtils.h"
 #include "Framework/Conventions/Constants.h"
 #include "Framework/Conventions/RefFrame.h"
@@ -33,6 +32,8 @@
 #include "Framework/Utils/PrintUtils.h"
 #include "Physics/NuclearState/NuclearModelI.h"
 #include "Physics/NuclearState/NuclearUtils.h"
+
+#include "FortranWrapperQELPXSec.h"
 
 using namespace genie;
 using namespace genie::constants;

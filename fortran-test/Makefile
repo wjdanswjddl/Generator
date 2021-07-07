@@ -9,13 +9,21 @@ GENIE_LIBS += -L${LHAPDF_LIB} -lLHAPDF
 
 # When including the Fortran code, you will likely need to link the executable
 # to -lgfortran as well
-test_xsec: test_xsec.o
-	g++ $(ROOT_LIBS) $(GENIE_LIBS) -o $@ $^
+test_xsec: test_xsec.o FortranWrapperQELPXSec.o root_dictionary.o
+	$(CXX) $(ROOT_LIBS) $(GENIE_LIBS) -o $@ $^
 
 %.o: %.cxx
-	g++ $(ROOT_CXX_FLAGS) $(GENIE_CXX_FLAGS) -o $@ -c $^
+	$(CXX) $(ROOT_CXX_FLAGS) $(GENIE_CXX_FLAGS) -o $@ -c $^
+
+root_dictionary.o:
+	$(RM) root_dictionary*.*
+	rootcling -f root_dictionary.cxx $(GENIE_CXX_FLAGS) \
+	  -c FortranWrapperQELPXSec.h LinkDef.h
+	$(CXX) $(ROOT_CXX_FLAGS) $(GENIE_CXX_FLAGS) \
+	-o $@ -c root_dictionary.cxx
+	$(RM) root_dictionary.cxx
 
 .PHONY: clean
 
 clean:
-	$(RM) *.o test_xsec
+	$(RM) *.o test_xsec root_dictionary_rdict.pcm
