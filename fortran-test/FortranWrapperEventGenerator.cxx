@@ -36,6 +36,7 @@
 // Extra includes
 #include "TGenPhaseSpace.h"
 #include "FortranWrapperEventGenerator.h"
+#include "FortranWrapperXSecIntegrator.h"
 
 using namespace genie;
 using namespace genie::controls;
@@ -408,4 +409,17 @@ double FortranWrapperEventGenerator::ComputeMaxXSec(const Interaction* in) const
   // maximum. The number used in the rejection method will be scaled up by a
   // safety factor. But it needs to be fast.
   LOG("QELEvent", pINFO) << "Computing maximum cross section to throw against";
+
+  // Use a brute-force scan by calling the integrator and then retrieving the
+  // largest differential cross section value seen during MC integration throws
+  const FortranWrapperXSecIntegrator* integrator
+    = dynamic_cast< const FortranWrapperXSecIntegrator* >(
+    fXSecModel->SubAlg( "XSec-Integrator" )
+  );
+  assert( integrator );
+
+  integrator->Integrate( fXSecModel, in );
+  double max = integrator->GetMaxDiffXSec();
+  max *= fSafetyFactor;
+  return max;
 }
