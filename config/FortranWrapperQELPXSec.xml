@@ -8,6 +8,7 @@
   <param_set name="Default">
 
     <param type="string"  name="CommonParam"> CKM </param>
+    <param type="alg"     name="NuclearModel"> genie::SpectralFunc </param>
 
   </param_set>
 

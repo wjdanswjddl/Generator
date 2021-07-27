@@ -56,6 +56,9 @@ public:
 
 private:
   void LoadConfig (void);
+
+  // Nuclear model to use for Pauli blocking, etc.
+  const NuclearModelI* fNuclModel;
 };
 
 } // genie namespace

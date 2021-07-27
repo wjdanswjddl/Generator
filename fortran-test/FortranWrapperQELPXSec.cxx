@@ -41,13 +41,13 @@ using namespace genie::controls;
 using namespace genie::utils;
 
 //____________________________________________________________________________
-extern"C" 
+extern"C"
 {
 void diracmatrices_(double *xmn_in);
 }
 
 //____________________________________________________________________________
-extern"C" 
+extern"C"
 {
 void cc1_(double *xq, double *w, double *wt, double *xk, double *xp, double *ee0, double *theta, int *ig, double *xsec);
 }
@@ -86,7 +86,7 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
 
    double nm_GeV = genie::PDGLibrary::Instance()->Find(2112)->Mass(); // Neutron mass
 
-   double xmn_in = 0.5 * 1000 * (pm_GeV + nm_GeV) / 197.327053; // (proton_{mass} + neutron_{mass})/(2*h_bar*c) in units of 1/fm*c^2 because (MeV/c^2)*[1/(MeV*fm)] 
+   double xmn_in = 0.5 * 1000 * (pm_GeV + nm_GeV) / 197.327053; // (proton_{mass} + neutron_{mass})/(2*h_bar*c) in units of 1/fm*c^2 because (MeV/c^2)*[1/(MeV*fm)]
 
    std::cout << "\n1 of 10) xmn_in = " << xmn_in << " 1/fm*c^2\n"; // double xmn_in1 = 4.7581860861217038;
 
@@ -119,11 +119,11 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
   // Input 3 of 10: w
 
    double il_E = ilep4->E()*1000; // initial lepton energy, converted from GeV to MeV
-   
+
    double fl_E = flep4.E()*1000; // final lepton energy, converted from GeV to MeV
 
    double w = sqrt((il_E - fl_E) * (il_E - fl_E)); // double w = 37.500000000000000;
-   
+
    std::cout << "3 of 10) w = " << w << " MeV\n"; // lepton energy loss in MeV (i.e. |incident lepton energy - final lepton energy|)
 
   // Input 4 of 10: wt
@@ -151,7 +151,7 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
    std::cout << "4 of 10) wt = " << wt << " MeV\n"; // Need to make sure units are correct, but everything should be in MeV I believe as long as definitions for hbar and c are consistent
 
   // Input 5 of 10: xk
-   
+
    // initial target functions defined above
 
    // initial hit functions defined above
@@ -169,18 +169,25 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
   // Input 6 of 10: xp
 
    TLorentzVector fhad4 = kinmat->HadSystP4(); // final hadron 4-momenta
- 
+
+   // Check outgoing nucleon momentum against kF. If it is Pauli-blocked, then
+   // just return zero without bothering to do the rest of the calculation.
+   double pNf = fhad4.P();
+   double kF = fNuclModel->LocalFermiMomentum( inuc4, inuc4.HitNucPdg(),
+     inuc4hit->Vect().Mag() );
+   if ( pNf < kF ) return 0.;
+
    double fh_E = fhad4.E()*1000; // final hadron E, converted from GeV to MeV
- 
+
    double fh_Px = fhad4.Px()/(197.3269804 * 0.001); // final hadron momentum in x, from GeV to 1/fm
- 
+
    double fh_Py = fhad4.Py()/(197.3269804 * 0.001); // final hadron momentum in y, from GeV to 1/fm
-   
+
    double fh_Pz = fhad4.Pz()/(197.3269804 * 0.001); // final hadron momentum in z, from GeV to 1/fm
 
    double xp = sqrt(fh_Px * fh_Px + fh_Py * fh_Py + fh_Pz * fh_Pz); // double xp = 1.3112528672942025;
 
-   std::cout << "6 of 10) xp = " << xp << " 1/fm\n"; // final nucleon (or hadron) three-momenta in inverse fm (i.e. magnitude of |final hadron 3-momenta|) 
+   std::cout << "6 of 10) xp = " << xp << " 1/fm\n"; // final nucleon (or hadron) three-momenta in inverse fm (i.e. magnitude of |final hadron 3-momenta|)
 
   // Input 7 of 10: ee0
 
@@ -196,18 +203,18 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
 
    double xil = sqrt(il_Px * il_Px + il_Py * il_Py + il_Pz * il_Pz); // Magnitude of initial lepton 3-momentum
 
-   double xfl = sqrt(fl_Px * fl_Px + fl_Py * fl_Py + fl_Pz * fl_Pz); // Magnitude of final lepton 3-momentum 
+   double xfl = sqrt(fl_Px * fl_Px + fl_Py * fl_Py + fl_Pz * fl_Pz); // Magnitude of final lepton 3-momentum
 
    double theta = acos( (il_Px * fl_Px + il_Py * fl_Py + il_Pz * fl_Pz) / ( xil * xfl) ); // double theta = 0.64577182323790194;
 
-   std::cout << "8 of 10) theta = " << theta << " rad (or " << theta * 180 / M_PI << " degrees)\n"; // angle between the initial lepton 3-momentum and final lepton 3-momentum 
+   std::cout << "8 of 10) theta = " << theta << " rad (or " << theta * 180 / M_PI << " degrees)\n"; // angle between the initial lepton 3-momentum and final lepton 3-momentum
 
   // Input 9 of 10: ig
 
    int ig = 2;
- 
+
    std::cout << "9 of 10) ig = " << ig << " Setting? (need to figure out what this actually is in Noemi's code)\n"; // variable for setting purposes in Noemi's code?
- 
+
   // Input 10 of 10: xsec
 
    double xsec;
@@ -259,4 +266,9 @@ void FortranWrapperQELPXSec::Configure(std::string config)
 //____________________________________________________________________________
 void FortranWrapperQELPXSec::LoadConfig(void)
 {
+  // Get access to the nuclear model for use in Pauli blocking, etc.
+  RgKey nuclkey = "NuclearModel";
+  fNuclModel = dynamic_cast< const NuclearModelI* >(
+    this->SubAlg("NuclearModel") );
+  assert( fNuclModel );
 }
