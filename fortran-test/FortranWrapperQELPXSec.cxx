@@ -34,6 +34,7 @@
 #include "Physics/NuclearState/NuclearUtils.h"
 
 #include "FortranWrapperQELPXSec.h"
+#include "FortranWrapperXSecIntegrator.h"
 
 using namespace genie;
 using namespace genie::constants;
@@ -250,6 +251,8 @@ double FortranWrapperQELPXSec::Integral(const Interaction* in) const
 {
   // We'll take care of this later. We need to use this function to get
   // total cross sections during spline generation.
+  double integ = fXSecIntegrator->Integrate( this, in );
+  return integ;
 }
 //____________________________________________________________________________
 bool FortranWrapperQELPXSec::ValidProcess(const Interaction* interaction) const
@@ -281,8 +284,12 @@ void FortranWrapperQELPXSec::Configure(std::string config)
 void FortranWrapperQELPXSec::LoadConfig(void)
 {
   // Get access to the nuclear model for use in Pauli blocking, etc.
-  RgKey nuclkey = "NuclearModel";
   fNuclModel = dynamic_cast< const NuclearModelI* >(
     this->SubAlg("NuclearModel") );
   assert( fNuclModel );
+
+  // Load XSec Integrator
+  fXSecIntegrator = dynamic_cast< const XSecIntegratorI* >(
+    this->SubAlg("XSec-Integrator") );
+  assert( fXSecIntegrator );
 }

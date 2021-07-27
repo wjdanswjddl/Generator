@@ -69,7 +69,8 @@ typedef enum EKinePhaseSpace {
   kPSTAfE,
   kPSEgTlOgfE,
   kPSDMELEvGen, // Equivalent to kPSQELEvGen for Dark Matter scattering
-  kPSlog10xlog10Q2fE
+  kPSlog10xlog10Q2fE,
+  kPSFullNBody,
 } KinePhaseSpace_t;
 
 class KinePhaseSpace
@@ -126,6 +127,7 @@ public:
       case(kPSDMELEvGen)   : return "<DMELEvGen>"; break;
       case(kPSTAfE)       : return "<{TA}|E>";   break;
       case(kPSlog10xlog10Q2fE) : return "<{log10x,log10Q2}|E>"; break;
+      case(kPSFullNBody) : return "<full N-body phase space|E>"; break;
     }
     return "** Undefined kinematic phase space **";
   }

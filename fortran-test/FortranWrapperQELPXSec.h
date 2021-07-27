@@ -36,6 +36,8 @@
 
 namespace genie {
 
+class XSecIntegratorI;
+
 class FortranWrapperQELPXSec : public XSecAlgorithmI {
 
 public:
@@ -59,6 +61,9 @@ private:
 
   // Nuclear model to use for Pauli blocking, etc.
   const NuclearModelI* fNuclModel;
+
+  // Helper class that integrates the total cross section
+  const XSecIntegratorI* fXSecIntegrator;
 };
 
 } // genie namespace

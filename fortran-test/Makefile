@@ -9,7 +9,7 @@ GENIE_LIBS += -L${LHAPDF_LIB} -lLHAPDF
 
 # When including the Fortran code, you will likely need to link the executable
 # to -lgfortran as well
-test_xsec: test_xsec.o FortranWrapperQELPXSec.o root_dictionary.o currents_opt_v1.o xsec_fact_new.o diracmatrices.o \
+test_xsec: test_xsec.o FortranWrapperQELPXSec.o FortranWrapperEventGenerator.o FortranWrapperXSecIntegrator.o root_dictionary.o currents_opt_v1.o xsec_fact_new.o diracmatrices.o \
   nform.o
 	$(CXX) $(ROOT_LIBS) $(GENIE_LIBS) -o $@ $^ -lgfortran
 

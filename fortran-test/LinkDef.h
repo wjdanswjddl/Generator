@@ -6,4 +6,6 @@
 
 #pragma link C++ namespace genie;
 #pragma link C++ class genie::FortranWrapperQELPXSec+;
+#pragma link C++ class genie::FortranWrapperEventGenerator+;
+#pragma link C++ class genie::FortranWrapperXSecIntegrator+;
 #endif
