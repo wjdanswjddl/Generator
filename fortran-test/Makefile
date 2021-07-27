@@ -9,15 +9,18 @@ GENIE_LIBS += -L${LHAPDF_LIB} -lLHAPDF
 
 # When including the Fortran code, you will likely need to link the executable
 # to -lgfortran as well
-test_xsec: test_xsec.o FortranWrapperQELPXSec.o FortranWrapperEventGenerator.o FortranWrapperXSecIntegrator.o root_dictionary.o currents_opt_v1.o xsec_fact_new.o diracmatrices.o \
-  nform.o
-	$(CXX) $(ROOT_LIBS) $(GENIE_LIBS) -O3 -o $@ $^ -lgfortran
+test_xsec: test_xsec.o libFortranWrapper.so
+	$(CXX) $(ROOT_LIBS) $(GENIE_LIBS) -L. -lFortranWrapper \
+	  -O3 -o $@ $^ -lgfortran
+
+libFortranWrapper.so: FortranWrapperQELPXSec.o FortranWrapperEventGenerator.o FortranWrapperXSecIntegrator.o root_dictionary.o currents_opt_v1.o xsec_fact_new.o diracmatrices.o nform.o
+	$(CXX) $(ROOT_LIBS) $(GENIE_LIBS) -O3 --shared -o $@ $^ -lgfortran
 
 %.o: %.cxx
 	$(CXX) $(ROOT_CXX_FLAGS) $(GENIE_CXX_FLAGS) -o $@ -c $^
 
 %.o: %.f90
-	gfortran -O3 -o $@ -c $^
+	gfortran -fPIC -O3 -o $@ -c $^
 
 root_dictionary.o:
 	$(RM) root_dictionary*.*
@@ -31,4 +34,4 @@ root_dictionary.o:
 .PHONY: clean
 
 clean:
-	$(RM) *.o test_xsec root_dictionary_rdict.pcm
+	$(RM) *.o test_xsec libFortranWrapper.so root_dictionary_rdict.pcm
