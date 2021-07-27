@@ -49,7 +49,7 @@ void diracmatrices_(double *xmn_in);
 //____________________________________________________________________________
 extern"C"
 {
-void cc1_(double *xq, double *w, double *wt, double *xk, double *xp, double *ee0, double *theta, int *ig, double *xsec);
+void cc1_(double *xq, double *w, double *wt, double *xk, double *xp, double *ee0, double *theta, int *ig, double *xsec, double *nuphi);
 }
 
 //____________________________________________________________________________
@@ -241,7 +241,7 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
 
   // Calculate sigma via calling cc1 Fortran90 subroutine
 
-   cc1_(&xq, &w, &wt, &xk, &xp, &ee0, &theta, &ig, &xsec);
+   cc1_(&xq, &w, &wt, &xk, &xp, &ee0, &theta, &ig, &xsec, &nuphi);
 
   return xsec;
 }
