@@ -2,7 +2,7 @@
 ROOT_CXX_FLAGS := $(shell root-config --cflags) -fPIC
 ROOT_LIBS := $(shell root-config --libs --evelibs) -lMathMore
 
-GENIE_CXX_FLAGS := -I$(shell genie-config --topsrcdir) -I${LOG4CPP_INC}
+GENIE_CXX_FLAGS := -I$(shell genie-config --topsrcdir) -I${LOG4CPP_INC} -O3
 GENIE_LIBS := $(shell genie-config --libs) -L${LOG4CPP_LIB} -lxml2 -llog4cpp
 GENIE_LIBS += -lEGPythia6 $(gsl-config --libs) -lGenVector
 GENIE_LIBS += -L${LHAPDF_LIB} -lLHAPDF
@@ -11,18 +11,19 @@ GENIE_LIBS += -L${LHAPDF_LIB} -lLHAPDF
 # to -lgfortran as well
 test_xsec: test_xsec.o FortranWrapperQELPXSec.o FortranWrapperEventGenerator.o FortranWrapperXSecIntegrator.o root_dictionary.o currents_opt_v1.o xsec_fact_new.o diracmatrices.o \
   nform.o
-	$(CXX) $(ROOT_LIBS) $(GENIE_LIBS) -o $@ $^ -lgfortran
+	$(CXX) $(ROOT_LIBS) $(GENIE_LIBS) -O3 -o $@ $^ -lgfortran
 
 %.o: %.cxx
 	$(CXX) $(ROOT_CXX_FLAGS) $(GENIE_CXX_FLAGS) -o $@ -c $^
 
 %.o: %.f90
-	gfortran -o $@ -c $^
+	gfortran -O3 -o $@ -c $^
 
 root_dictionary.o:
 	$(RM) root_dictionary*.*
 	rootcling -f root_dictionary.cxx $(GENIE_CXX_FLAGS) \
-	  -c FortranWrapperQELPXSec.h LinkDef.h
+	  -c FortranWrapperQELPXSec.h FortranWrapperEventGenerator.h \
+	  FortranWrapperXSecIntegrator.h LinkDef.h
 	$(CXX) $(ROOT_CXX_FLAGS) $(GENIE_CXX_FLAGS) \
 	-o $@ -c root_dictionary.cxx
 	$(RM) root_dictionary.cxx

@@ -20,6 +20,8 @@
 #include "Physics/NuclearState/SpectralFunc.h"
 #include "Physics/QuasiElastic/XSection/QELUtils.h"
 
+#include "FortranWrapperXSecIntegrator.h"
+
 // The number of Interaction objects to create in the event loop below
 constexpr int NUM_EVENTS = 100;
 // Upper limit on the number of phase space throws to use (avoids a potentially
@@ -38,7 +40,7 @@ int main() {
 
   // Configure the input interaction
   int probe_pdg = 11; // electron
-  double Eprobe = 1.650; // GeV
+  double Eprobe = 0.961; // GeV
   int target_pdg = 1000060120; // 12C
   int struck_nucleon_pdg = genie::kPdgProton; // genie::kPdgNeutron
   double probe_mass = genie::PDGLibrary::Instance()
@@ -65,6 +67,18 @@ int main() {
 
   const auto* nucl_model = dynamic_cast< const genie::NuclearModelI* >(
     factory->GetAlgorithm("genie::SpectralFunc", "Default") );
+
+  // Compute the total cross section
+  const genie::FortranWrapperXSecIntegrator* integrator
+    = dynamic_cast< const genie::FortranWrapperXSecIntegrator* >(
+    xsec_model->SubAlg( "XSec-Integrator" )
+  );
+  assert( integrator );
+
+  double integ = integrator->Integrate( xsec_model, interaction );
+  double max = integrator->GetMaxDiffXSec();
+  std::cout << "TOTAL XSEC = " << integ << '\n';
+  std::cout << "MAX XSEC = " << max << '\n';
 
   for ( int e = 0; e < NUM_EVENTS; ++e ) {
 
@@ -131,9 +145,9 @@ int main() {
     interaction->KinePtr()->SetHadSystP4( *p4Nf );
 
     // Compute the differential cross section
-    double xsec = xsec_model->XSec( interaction, genie::kPSQELEvGen );
-
-    std::cout << "Event " << e << ", xsec = " << xsec << '\n';
+    std::cout << "EVENT " << e << '\n';
+    double xsec = xsec_model->XSec( interaction, genie::kPSFullNBody );
+    std::cout << "XSEC = " << xsec << '\n';
 
   } // event loop
 

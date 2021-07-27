@@ -170,6 +170,8 @@
    <config alg="genie::SmithMonizQELCCPXSec">               SmithMonizQELCCPXSec.xml               </config>
    <config alg="genie::UnifiedQELPXSec">                    UnifiedQELPXSec.xml                    </config>
    <config alg="genie::FortranWrapperQELPXSec">             FortranWrapperQELPXSec.xml                    </config>
+   <config alg="genie::FortranWrapperEventGenerator">       FortranWrapperEventGenerator.xml                    </config>
+   <config alg="genie::FortranWrapperXSecIntegrator">       FortranWrapperXSecIntegrator.xml                    </config>
    <config alg="genie::QPMDMDISPXSec">                      QPMDMDISPXSec.xml                      </config>
    <config alg="genie::QPMDISPXSec">                        QPMDISPXSec.xml                        </config>
    <config alg="genie::KNOTunedQPMDISPXSec">                KNOTunedQPMDISPXSec.xml                </config>

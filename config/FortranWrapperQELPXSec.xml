@@ -9,6 +9,8 @@
 
     <param type="string"  name="CommonParam"> CKM </param>
     <param type="alg"     name="NuclearModel"> genie::SpectralFunc </param>
+    <param type="alg"     name="XSec-Integrator"> genie::FortranWrapperXSecIntegrator </param>
+    <param type="string"  name="IntegralNucleonBindingMode"> UseNuclearModel </param>
 
   </param_set>
 

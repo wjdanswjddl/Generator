@@ -58,7 +58,7 @@ double FortranWrapperXSecIntegrator::Integrate(const XSecAlgorithmI* model, cons
   interaction->SetBit( kISkipKinematicChk );
 
   const NuclearModelI* nucl_model = dynamic_cast< const NuclearModelI* >(
-    model->SubAlg("IntegralNuclearModel") );
+    model->SubAlg("NuclearModel") );
   assert( nucl_model );
 
   AlgFactory* algf = AlgFactory::Instance();
@@ -160,17 +160,28 @@ double FortranWrapperXSecIntegrator::Integrate(const XSecAlgorithmI* model, cons
     // Compute the differential cross section
     double xsec = model->XSec( interaction, kPSFullNBody );
 
+    if ( std::isnan(xsec) ) continue;
+
     if ( xsec > fMaxDiffXSec ) fMaxDiffXSec = xsec;
 
     xsec_sum += xsec;
 
-    xsec_sum_of_squares = xsec * xsec;
+    xsec_sum_of_squares += xsec * xsec;
 
-    if ( xsec_sum > 0. ) {
+    if ( xsec_sum > 0. && n > 10 ) {
       double xsec_mean = xsec_sum / n;
       double sum_variance = (xsec_sum_of_squares / n) - xsec_mean*xsec_mean;
       double xsec_std_error = std::sqrt( sum_variance / n );
       double rel_error = xsec_std_error / xsec_mean;
+      if ( n % 10000 == 0 ) {
+        std::cout << "  ITERATION = " << n << '\n';
+        std::cout << "  MAX DIFF XSEC = " << fMaxDiffXSec << '\n';
+        std::cout << "  INTEGRAL = " << xsec_mean
+          << " +/- " << xsec_std_error << '\n';
+        std::cout << "  SUM VARIANCE = " << sum_variance << '\n';
+        std::cout << "  STD ERROR = " << xsec_std_error << '\n';
+        std::cout << "  REL ERROR = " << rel_error << "\n\n\n";
+      }
       if ( rel_error < fDesiredRelativePrecision ) converged = true;
     }
   }
@@ -180,6 +191,8 @@ double FortranWrapperXSecIntegrator::Integrate(const XSecAlgorithmI* model, cons
 
   // MC estimator of the total cross section is the mean of the xsec values
   double xsec_mean = xsec_sum / n;
+
+  std::cout << "Integral = " << xsec_mean << ", iterations = " << n << '\n';
 
   return xsec_mean;
 }

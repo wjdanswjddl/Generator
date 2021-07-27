@@ -103,7 +103,7 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
 
    double xmn_in = 0.5 * 1000 * (pm_GeV + nm_GeV) / 197.327053; // (proton_{mass} + neutron_{mass})/(2*h_bar*c) in units of 1/fm*c^2 because (MeV/c^2)*[1/(MeV*fm)]
 
-   std::cout << "\n1 of 11) xmn_in = " << xmn_in << " 1/fm*c^2\n"; // double xmn_in1 = 4.7581860861217038;
+   //std::cout << "\n1 of 11) xmn_in = " << xmn_in << " 1/fm*c^2\n"; // double xmn_in1 = 4.7581860861217038;
 
   // Input 2 of 11: xq
 
@@ -129,7 +129,7 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
 
    double xq = sqrt( (il_Px - fl_Px)*(il_Px - fl_Px) + (il_Py - fl_Py)*(il_Py - fl_Py) + (il_Pz - fl_Pz)*(il_Pz - fl_Pz) ); // double xq = 2.2944884204923253;
 
-   std::cout << "2 of 11) xq = " << xq << " 1/fm\n"; // three-momentum transfer in inverse fm (i.e. magnitude of |incident electron 3-momentum - final electron 3-momentum|)
+   //std::cout << "2 of 11) xq = " << xq << " 1/fm\n"; // three-momentum transfer in inverse fm (i.e. magnitude of |incident electron 3-momentum - final electron 3-momentum|)
 
   // Input 3 of 11: w
 
@@ -139,7 +139,7 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
 
    double w = sqrt((il_E - fl_E) * (il_E - fl_E)); // double w = 37.500000000000000;
 
-   std::cout << "3 of 11) w = " << w << " MeV\n"; // lepton energy loss in MeV (i.e. |incident lepton energy - final lepton energy|)
+   //std::cout << "3 of 11) w = " << w << " MeV\n"; // lepton energy loss in MeV (i.e. |incident lepton energy - final lepton energy|)
 
   // Input 4 of 11: wt
 
@@ -163,7 +163,7 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
 
    double wt = w + in_E_MeV - sqrt(pm_MeV * pm_MeV + xk_MeV * xk_MeV); // |initial lepton (electron) energy - final lepton (electron) energy)| + initial nucleon (proton) energy - \sqrt{ [nucleon (proton) mass]^2 + |initial nucleon (proton) 3-momenta|^2 } = w + M - E - E_{\mathbf{p}} = E_{\mathbf{p'}} - E_{\mathbf{p}}
 
-   std::cout << "4 of 11) wt = " << wt << " MeV\n"; // Need to make sure units are correct, but everything should be in MeV I believe as long as definitions for hbar and c are consistent
+   //std::cout << "4 of 11) wt = " << wt << " MeV\n"; // Need to make sure units are correct, but everything should be in MeV I believe as long as definitions for hbar and c are consistent
 
   // Input 5 of 11: xk
 
@@ -179,7 +179,7 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
 
    double xk = sqrt(in_Px * in_Px + in_Py * in_Py + in_Pz * in_Pz); // double xk = 1.0642230591666515;
 
-   std::cout << "5 of 11) xk = " << xk << " 1/fm\n"; // initial nucleon three-momenta in inverse fm (i.e. magnitude of |initial nucleon 3-momenta|)
+   //std::cout << "5 of 11) xk = " << xk << " 1/fm\n"; // initial nucleon three-momenta in inverse fm (i.e. magnitude of |initial nucleon 3-momenta|)
 
   // Input 6 of 11: xp
 
@@ -202,13 +202,13 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
 
    double xp = sqrt(fh_Px * fh_Px + fh_Py * fh_Py + fh_Pz * fh_Pz); // double xp = 1.3112528672942025;
 
-   std::cout << "6 of 11) xp = " << xp << " 1/fm\n"; // final nucleon (or hadron) three-momenta in inverse fm (i.e. magnitude of |final hadron 3-momenta|)
+   //std::cout << "6 of 11) xp = " << xp << " 1/fm\n"; // final nucleon (or hadron) three-momenta in inverse fm (i.e. magnitude of |final hadron 3-momenta|)
 
   // Input 7 of 11: ee0
 
    double ee0 = il_E; // double ee0 = 730.00000000000000;
 
-   std::cout << "7 of 11) ee0 = " << ee0 << " MeV\n"; // incident lepton energy in MeV
+   //std::cout << "7 of 11) ee0 = " << ee0 << " MeV\n"; // incident lepton energy in MeV
 
   // Input 8 of 11: theta
 
@@ -222,19 +222,18 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
 
    double theta = acos( (il_Px * fl_Px + il_Py * fl_Py + il_Pz * fl_Pz) / ( xil * xfl) ); // double theta = 0.64577182323790194;
 
-   std::cout << "8 of 11) theta = " << theta << " rad (or " << theta * 180 / M_PI << " degrees)\n"; // angle between the initial lepton 3-momentum and final lepton 3-momentum
+   //std::cout << "8 of 11) theta = " << theta << " rad (or " << theta * 180 / M_PI << " degrees)\n"; // angle between the initial lepton 3-momentum and final lepton 3-momentum
 
   // Input 9 of 11: ig
 
    int ig = 2;
 
-   std::cout << "9 of 11) ig = " << ig << " Setting? (need to figure out what this actually is in Noemi's code)\n"; // variable for setting purposes in Noemi's code?
+   //std::cout << "9 of 11) ig = " << ig << " Setting? (need to figure out what this actually is in Noemi's code)\n"; // variable for setting purposes in Noemi's code?
 
   // Input 10 of 11: xsec
 
    double xsec;
 
-   std::cout << "10 of 11) xsec is passed in without a defined value, then given one via cc1 below:" << '\n';
 
   // Input 11 of 11: nuphi
 
@@ -246,9 +245,9 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
 
   // magnitude of final nucleon or hadrom 3-momentum defined above
 
-  double nuphi = acos( (in_Px * fh_Px + in_Py * fh_Py + in_Pz * fh_Pz) / ( xk * xp) ); // angle between the initial nucleon 3-momentum and final nucleon 3-momentum
+  double nuphi = fhad4.Phi();
 
-   std::cout << "11 of 11) nuphi = " << nuphi << " rad (or " << nuphi * 180 / M_PI << " degrees)\n"; // angle between the initial nucleon 3-momentum and final nucleon 3-momentum 
+   //std::cout << "11 of 11) nuphi = " << nuphi << " rad (or " << nuphi * 180 / M_PI << " degrees)\n"; // angle between the initial nucleon 3-momentum and final nucleon 3-momentum
 
   // Set up dirac matrices via calling diracmatrices Fortran90 subroutine
 

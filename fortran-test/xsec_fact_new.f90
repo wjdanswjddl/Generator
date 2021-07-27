@@ -12,11 +12,10 @@
     use xsec_fact
     use dirac_matrices
     implicit none
-    integer*4, parameter :: nphi=50
     integer*4 :: ig,i
     real*8 :: xq, w,wt, xk, xp, ee0, theta,sig,sigma,wtf,nuphi
     real*8 :: ek,epf,xmf
-    real*8 :: hphi,phi,xk_x,xk_y,xk_z
+    real*8 :: xk_x,xk_y,xk_z
     real*8 :: p_4(4),pp_4(4),q_4(4), cosa
 !     ee0      incident electron energy in MeV
 !     w        electron energy loss in MeV
@@ -43,32 +42,23 @@
       q_4(1)=wtf
       q_4(2:3)=0.0d0
       q_4(4)=xq
-      !
-      hphi=2.0d0*pi/dble(nphi)
-      sigma=0.0d0
-!      GENIE edit below, commented out loop
-!      do i=1,nphi
-!      GENIE edit below, changed i to 1
-         phi=(dble(1)-0.5d0)*hphi
-         xk_x=xk*sqrt(sina2)*cos(phi)
-         xk_y=xk*sqrt(sina2)*sin(phi)      
-         xk_z=xk*cosa
-         !...define the initial and final nucleon 4-momentum
-         p_4(1)=ek
-         p_4(2)=xk_x
-         p_4(3)=xk_y
-         p_4(4)=xk_z
-         pp_4(1)=epf
-         pp_4(2)=xk_x
-         pp_4(3)=xk_y
-         pp_4(4)=xk_z+xq
-         call current_init(p_4,pp_4,q_4)
-         call define_spinors()
-         call sigccc(sig,ig)
-         sigma=sigma+sig*hphi
-!      GENIE edit below, commented out loop
-!      enddo
-      
+      xk_x=xk*sqrt(sina2)*cos(nuphi)
+      xk_y=xk*sqrt(sina2)*sin(nuphi)
+      xk_z=xk*cosa
+      !...define the initial and final nucleon 4-momentum
+      p_4(1)=ek
+      p_4(2)=xk_x
+      p_4(3)=xk_y
+      p_4(4)=xk_z
+      pp_4(1)=epf
+      pp_4(2)=xk_x
+      pp_4(3)=xk_y
+      pp_4(4)=xk_z+xq
+      call current_init(p_4,pp_4,q_4)
+      call define_spinors()
+      call sigccc(sig,ig)
+      sigma=sig
+
       return
     end subroutine cc1
     
