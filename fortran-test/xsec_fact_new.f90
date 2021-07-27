@@ -7,14 +7,14 @@
   end module xsec_fact
 
 
-
-  subroutine cc1(xq,w,wt,xk,xp,ee0,theta,ig,sigma)
+! GENIE edit below, added in nucleon phi (nuphi) variable
+  subroutine cc1(xq,w,wt,xk,xp,ee0,theta,ig,sigma,nuphi)
     use xsec_fact
     use dirac_matrices
     implicit none
     integer*4, parameter :: nphi=50
     integer*4 :: ig,i
-    real*8 :: xq, w,wt, xk, xp, ee0, theta,sig,sigma,wtf
+    real*8 :: xq, w,wt, xk, xp, ee0, theta,sig,sigma,wtf,nuphi
     real*8 :: ek,epf,xmf
     real*8 :: hphi,phi,xk_x,xk_y,xk_z
     real*8 :: p_4(4),pp_4(4),q_4(4), cosa
@@ -46,8 +46,10 @@
       !
       hphi=2.0d0*pi/dble(nphi)
       sigma=0.0d0
-      do i=1,nphi
-         phi=(dble(i)-0.5d0)*hphi
+!      GENIE edit below, commented out loop
+!      do i=1,nphi
+!      GENIE edit below, changed i to 1
+         phi=(dble(1)-0.5d0)*hphi
          xk_x=xk*sqrt(sina2)*cos(phi)
          xk_y=xk*sqrt(sina2)*sin(phi)      
          xk_z=xk*cosa
@@ -64,7 +66,8 @@
          call define_spinors()
          call sigccc(sig,ig)
          sigma=sigma+sig*hphi
-      enddo
+!      GENIE edit below, commented out loop
+!      enddo
       
       return
     end subroutine cc1
