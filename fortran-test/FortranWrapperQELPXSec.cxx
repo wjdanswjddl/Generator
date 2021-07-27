@@ -258,6 +258,11 @@ double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
 
    cc1_(&xq, &w, &wt, &xk, &xp, &ee0, &theta, &ig, &xsec, &nuphi);
 
+  // Apply Jacobian to transform into the kPSFullNBody phase space
+  double pLepFinal = fsLeptonP4.Vect().Mag();
+  double ENf = fhad4.E();
+  xsec *= 2. * ENf / ( kPi * pNf * pNf * pLepFinal );
+
   return xsec;
 }
 //____________________________________________________________________________
