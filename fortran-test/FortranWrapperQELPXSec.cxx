@@ -74,6 +74,20 @@ FortranWrapperQELPXSec::~FortranWrapperQELPXSec()
 double FortranWrapperQELPXSec::XSec(const Interaction* interaction,
   KinePhaseSpace_t kps) const
 {
+  // Apply the global Q^2 cut imposed by GENIE
+  TLorentzVector* tempProbeP4 = interaction->InitState().GetProbeP4();
+  TLorentzVector probeP4 = *tempProbeP4;
+  delete tempProbeP4;
+
+  const TLorentzVector& fsLeptonP4 = interaction->Kine().FSLeptonP4();
+  // 4-momentum transfer
+  TLorentzVector qP4 = probeP4 - fsLeptonP4;
+  double Q2 = -1. * qP4.Mag2();
+
+  interaction->KinePtr()->SetQ2( Q2 );
+
+  if ( Q2 < genie::utils::kinematics::electromagnetic::kMinQ2Limit ) return 0.;
+
   // This is the main "missing piece" for interfacing with Noemi's code.
   // Given an Interaction object which will be pre-loaded with the correct
   // variables, we need to extract the inputs to Noemi's function, call that
