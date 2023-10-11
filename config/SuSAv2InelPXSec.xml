@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<alg_conf>
+
+<!--
+Configuration for the SuSAv2 inelastic differential cross section algorithm
+
+Configurable Parameters:
+......................................................................................................................................
+Name                        Type Optional Comment                                                        Default
+......................................................................................................................................
+RES-CC-XSecScale            double  No    XSec rescaling factor                                           
+RES-EM-XSecScale            double  No    Xsec rescaling factor                                           
+Wcut                        double  No    Param used in DIS/RES joining                                   CommonParam[NonResBackground]
+RFG-UseParametrization      bool    No    use parametrization for Fermi momentum and binding energy       CommonParam[FermiGas]
+                                            
+FermiMomentumTable          string  No    Table of Fermi momentum (kF) constants for various nuclei       CommonParam[FermiGas]
+XSec-Integrator             alg     No                    
+-->
+
+  <param_set name="Default"> 
+    
+    <param type="string" name="CommonParam"> WeakInt,NonResBackground,CKM,FermiGas </param>
+    
+    <param type="double" name="RES-CC-XSecScale"> 1.000 </param>
+    <param type="double" name="RES-EM-XSecScale"> 1.000 </param>
+
+    <param type="double" name="FermiMomentum"> 0.228 </param>
+
+    <!-- Inelastic structure functions from
+    A. Bodek and J. L. Ritchie, Phys. Rev. D 24, 1400 (1981).
+    A. Bodek and J. L. Ritchie, Phys. Rev. D 23, 1070 (1981).
+    !-->
+    <param type="string" name="InelStrucFuncFile"> StructureFunction_wi_BR.dat </param>
+
+    <!-- Inelastic structure functions from
+    M. E. Christy and P. E. Bosted, Phys. Rev. C 81, 055213 (2010)
+    P. E. Bosted and M. E. Christy, Phys. Rev. C 77, 065206 (2008)
+    <param type="string" name="InelStrucFuncFile"> StructureFunction_wi_BC.dat </param>
+    -->
+
+    <!-- Inelastic structure functions from
+     M. Gluck, E. Reya and A. Vogt, Eur. Phys. J. C 5, 461 (1998)
+    <param type="string" name="InelStrucFuncFile"> StructureFunction_wi_PDF.dat </param>
+    -->
+
+  </param_set>
+
+</alg_conf>
