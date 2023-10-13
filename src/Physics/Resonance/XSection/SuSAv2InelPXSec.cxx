@@ -109,7 +109,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
   delete p4_probe;
 
   // Momentum transfer
-  double q = pv*pv + pl2 - 2.*pv*pl*ctl;
+  double q =std::sqrt(std::max(0., pv*pv + pl2 - 2.*pv*pl*ctl));
 
 //////////////////////////////////////////////////////////////
 // BEGIN CODE FROM JESUS
@@ -461,7 +461,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
 
       //CROSS SECTION
 
-     CS_inel=sigma0*Fx2; //*unit;
+     CS_inel=sigma0*Fx2*unit;
    }
 
    //cout <<"d^2 sigma/d Omega d k{^prime} (cm^2/GeV/str) " <<CS_inel << endl;
