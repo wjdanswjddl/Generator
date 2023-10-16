@@ -129,22 +129,9 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
   double rmpi=0.14; //GeV
   double esep=0.02; //GeV
 
-  //Limits of the integral of the invariance mass.
-  double W_ini=rmpi + rmn;
-  double W_end=rmn + w - esep;
-  /*  With these limits, we study the full inelastic spectrum, as an example in this code.
-    Accordinng to the model, the limits can be altered to exclude part of the inelastic in which we
-    are not interested. Not in this code, as it is written.
-    J. Gonzalez-Rosa et al. Phys. Rev. D 105, 093009 (2022).
-    G. D. Megias, PhD Thesis (2017). */
 
   //cout << pi << " , " << epsF << " , " << W_end << endl;
 
-  double CS_inel;
-
-    if (W_end <= W_ini) CS_inel=0.0;
-   else
-   {
    //KINEMATICS
    double ener2=ener1 - w; //Energy of the lepton
    double xkp=sqrt(ener2*ener2 - xmil*xmil); //Momentum of the lepton
@@ -185,6 +172,8 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
   /* INELASTIC RESPONSES
      We look in the files the value of Q² that is closest to the one which we have according
      to exchange momentum and exchange energy. */
+     
+     double W=1.23;
 
     int j=0;
      for (int m=0; m<1002000; ++m)
@@ -193,45 +182,27 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
            j=j+1;
      }
 
-       int n_step=j-1;
+       int n_step=j;
 
    // We search the value of the invariant mass that it is the closest to the upper limit that the kinematics gave us.
 
     int f=0;
      for (int i=0; i<1000; ++i)
      {
-        if( W_end>=Wvec[i + n_step]&&W_end<=Wvec[i + n_step +1]) break;
+        if( W>=Wvec[i + n_step]&&W<=Wvec[i + n_step +1]) break;
         f=f+1;
      }
-       int i_step=f-1;
+       int i_step=f;
 
    //    cout << n_step <<" " << i_step << endl;
 
-       // The step of the reduced invariant mass mu_X=W/m_N
-
-       double xmuxstep=(Wvec[n_step + 1]  - Wvec[n_step])/rmn;
-
-
-       //cout << xmuxstep << ", " <<Wvec[n_step+1] << ", " << Wvec[n_step] << endl;
-       //Integrating the integral for each hadronic response
-
-       double aRCinel=0;
-       double aRTinel=0;
-       double aRLLinel=0;
-       double aRCLinel=0;
-       double aRTpinel=0;
-
-
-      //If the kinematics are bellow the pion production energy, the cross section will be zero.
-       for (int s=0; s<i_step; ++s)
-       {
-        double xmux=Wvec[s + n_step]/rmn;
-        double w1_p=w1pvec[s + n_step];
-        double w1_n=w1nvec[s + n_step];
-        double w2_p=w2pvec[s + n_step];
-        double w2_n=w2nvec[s + n_step];
-        double w3_p=w3pvec[s + n_step];
-        double w3_n=w3nvec[s + n_step];
+        double xmux=Wvec[i_step + n_step]/rmn;
+        double w1_p=w1pvec[i_step + n_step];
+        double w1_n=w1nvec[i_step + n_step];
+        double w2_p=w2pvec[i_step + n_step];
+        double w2_n=w2nvec[i_step + n_step];
+        double w3_p=w3pvec[i_step + n_step];
+        double w3_n=w3nvec[i_step + n_step];
 
         //cout << "xmux "<<xmux << " tau " <<tau << " w1p " << w1_p << " w1n " << w1_n << endl;
        // cout << "w2p " << w2_p << " w2n " << w2_n << " w3p " << w3_p << " w3n "<< w3_n<< endl;
@@ -422,35 +393,12 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
          //cout << "cte " << cte << " GC " << Ginel_C << " GT " << Ginel_T << " GLL "<<Ginel_LL << endl;
          //cout << Ginel_CL << " GTp " << Ginel_Tp << endl
 
-         if (isnan(Ginel_C) || isnan(Ginel_T)|| isnan(Ginel_LL) || isnan(Ginel_CL) || isnan(Ginel_Tp) )
-         {Ginel_C=0;
-         Ginel_T=0;
-         Ginel_LL=0;
-         Ginel_CL=0;
-         Ginel_Tp=0;}
-
-
-         aRCinel= aRCinel + Ginel_C*xmux*xmuxstep;
-         aRTinel= aRTinel + Ginel_T*xmux*xmuxstep;
-         aRLLinel= aRLLinel + Ginel_LL*xmux*xmuxstep;
-         aRCLinel= aRCLinel + Ginel_CL*xmux*xmuxstep;
-         aRTpinel= aRTpinel + Ginel_Tp*xmux*xmuxstep;
-       }
-
-        double RCinel= aRCinel;
-        double RTinel= aRTinel;
-        double RLLinel=aRLLinel;
-        double RCLinel=aRCLinel;
-        double RTpinel=aRTpinel;
-
-      //   cout << "RC " << RCinel << " RT "<<RTinel << " RLL " <<RLLinel <<" RCL " <<RCLinel << " RTp "<<RTpinel <<endl;
-
 
       /* INELASTIC CROSS SECTION */
 
       // Tensor contraction
 
-      double Fx2=Vcc*RCinel + Vt*RTinel + Vll*RLLinel + 2*Vcl*RCLinel + inu*2*Vt_p*RTpinel;
+      double Fx2=Vcc*Ginel_C + Vt*Ginel_T + Vll*Ginel_LL + 2*Vcl*Ginel_CL + inu*2*Vt_p*Ginel_Tp;
 
       //Definition of Sigma0 and units
       double unit=hc*hc*1E-26; //to transform to cm^2/GeV/str dsdomegadKp
@@ -461,8 +409,8 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
 
       //CROSS SECTION
 
-     CS_inel=sigma0*Fx2*unit;
-   }
+    double   CS_inel=sigma0*Fx2*unit;
+   
 
    //cout <<"d^2 sigma/d Omega d k{^prime} (cm^2/GeV/str) " <<CS_inel << endl;
 
