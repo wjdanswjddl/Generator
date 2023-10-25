@@ -27,6 +27,9 @@
 #include "Framework/ParticleData/PDGCodes.h"
 #include "Framework/ParticleData/PDGUtils.h"
 #include "Physics/Resonance/XSection/SuSAv2InelPXSec.h"
+#include "Framework/Conventions/Units.h"
+#include "Framework/Conventions/Constants.h"
+
 
 namespace {
 
@@ -116,18 +119,18 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
 
   // Constants
   double pi = std::acos( -1.0 );
-  double hc=0.197327; //GeV*fm
-  double GF=1.16639E-5; //Cte Fernu, en GeV**-2
+ // double hc=genie::units::hbarc/1.e-15; //    0.197327; //GeV*fm
+  double GF=genie::constants::kGF;     //1.16639E-5; //Cte Fernu, en GeV**-2
   double cos_cabibbo=0.97429; // Cabibbo angle
-  double rmProton=0.93827231;
-  double rmNeutron=0.9395657;
-  double rmn=(rmProton + rmNeutron)/2.0; //GeV
+  //double rmProton=0.93827231;
+  //double rmNeutron=0.9395657;
+  double rmn=genie::constants::kNucleonMass;               //(rmProton + rmNeutron)/2.0; //GeV
   // Fermi momentum
   double etaF=pF/rmn;
   double epsF=sqrt(1.0 + etaF*etaF);
   double xiF=epsF - 1.0;
-  double rmpi=0.14; //GeV
-  double esep=0.02; //GeV
+//  double rmpi=0.14; //GeV
+ //double esep;
 
 
   //cout << pi << " , " << epsF << " , " << W_end << endl;
@@ -142,6 +145,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
    double xk=q/(2*rmn);
    double xlambda=w/(2*rmn);
    double tau= pow(xk,2) - pow(xlambda,2);
+
    // double tau=-Q2/(4*rmn*rmn);
    //double psi=(1/sqrt(xiF))*(xlambda*tau)/sqrt( (1+ xlambda)*tau + xk*sqrt(tau*(tau + 1)))
 
@@ -164,7 +168,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
    double Vll=xnu*xnu + xtg*(1 + 2*xnu/xrho_p + xrho*xdelta*xdelta)*xdelta*xdelta;
    double Vt=xrho/2 + xtg -xtg*(xnu + xrho*xrho_p*xdelta*xdelta/2)*xdelta*xdelta/xrho_p;
    double Vt_p=(1 - xnu*xrho_p*xdelta*xdelta)*xtg/xrho_p;
-   double Vl=Vcc + 2*Vcl*xlambda/xk + Vll*pow(xlambda/xk,2);
+  // double Vl=Vcc + 2*Vcl*xlambda/xk + Vll*pow(xlambda/xk,2);
 
   // cout << "Vl " << Vl << " Vcc " << Vcc << " Vcl " << Vcl << " Vll "<< Vll << " Vt "<< Vt << " Vt_p "<< Vt_p <<endl;
 
@@ -173,7 +177,6 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
      We look in the files the value of Q² that is closest to the one which we have according
      to exchange momentum and exchange energy. */
      
-     double W=1.23;
 
     int j=0;
      for (int m=0; m<1002000; ++m)
@@ -189,7 +192,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
     int f=0;
      for (int i=0; i<1000; ++i)
      {
-        if( W>=Wvec[i + n_step]&&W<=Wvec[i + n_step +1]) break;
+        if(xW>=Wvec[i + n_step]&& xW<=Wvec[i + n_step +1]) break;
         f=f+1;
      }
        int i_step=f;
@@ -210,7 +213,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
        // We define the inelastic psi variable, the inelasticity paraemter and the Bjorken variable
 
        double rhox=1 + (xmux*xmux -1)/(4*tau);
-       double xxx=1/rhox; //The x-Bjorken variable.
+      // double xxx=1/rhox; //The x-Bjorken variable.
        // double rnu= ( pow(xmux*rmn,2) -rmn*rmn + tau*rmn*rmn*4)/(2*rmn) //The y-Bjorken variable
        double psix=(1/sqrt(xiF))*(xlambda - tau*rhox)/sqrt(tau*(1 + xlambda*rhox) + xk*sqrt(tau*(1+ tau*rhox*rhox)) );
 
@@ -288,16 +291,16 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
 
         // A) SuSAv2-RMF
 
-         double shifte=-5; //shift inelastic parametrization for 12C
+         //double shifte=-5; //shift inelastic parametrization for 12C
          // q en MeV to calculate Eshift_RMF and Eshift_RPWIA
          double xq=q*1000;
 
          // fL isovector (e, e') RMF q = 650 MeV
-         double a1=0.89225; // +/- 0.01183 (1.326 %)
+        /*  double a1=0.89225; // +/- 0.01183 (1.326 %)
          double a2=0.657214; // +/- 0.01588 (2.416 %)
          double a3=0.170801; // +/- 0.02409 (14.11 %)
-         double a4=-0.750098; //+/- 0.08646 (11.53 %)
-
+         double a4=-0.750098; //+/- 0.08646 (11.53 %) */
+          
          // Eshift_RMF
          double Eshift_RMF=-15.506 + 0.0548*xq + shifte;
          if (Eshift_RMF<0 && shifte>0) Eshift_RMF=0;
@@ -328,12 +331,13 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
 
           // B) SuSAv2-RPWIA
 
-          double b1=-0.892196; // +/- 0.05081 (5.694 %)
+          /*double b1=-0.892196; // +/- 0.05081 (5.694 %)
           double b2=520.898; // +/- 1.733E4 (3327 %)
           double b3=-2906.94; // +/- 9.651E4 (3320 %)
           double b4=6475.57; //+/- 5.112E4 (789.4 %)
           double b5=1.74049; //+/- 1.767 (101.5 %)
-          double b6=0.64559; // +/- 0.3952 (61.21 %)
+          double b6=0.64559; // +/- 0.3952 (61.21 %) */
+          
 
           // Eshift_RPWIA
           double Eshift_RPWIA=25.164 + 0.0112*xq +shifte;
@@ -364,17 +368,17 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
          // cout << "fLT1 " << fLT1 << " fLT1 neg "<<fLT1_neg << " fLT1rpwia " << fLT1rpwia << endl;
 
          // DEFINITION of RMF + RPWIA SCALING FUNCTIONS
-         double qi0=533.989; // +/- 122.5 (110.7 %)
+        /* double qi0=533.989; // +/- 122.5 (110.7 %)
          double qi1=0.651644; // +/- 0.8131 (31.87 %)
          double qi00=494.439; // +/- 122.5 (110.7 %)
-         double qi11=0.706034; // +/- 0.8231 (31.87 %)
+         double qi11=0.706034; // +/- 0.8231 (31.87 %) */
 
          double q0imev=0.0;
          if(xq<1231.3858)  q0imev=qi0 + qi1*xq;
          if(xq>1231.3858)  q0imev=qi00 + qi11*xq;
 
          double q0i=q0imev/1000;
-         double w0=0.2;
+         //double w0=0.2;
          double arg=(pi/2)*( 1 - 1/(1 + exp((q - q0i)/w0)));
          double fscaling=pow(cos(arg),2)*fLT1rmf + pow(sin(arg),2)*fLT1rpwia;
 
@@ -401,7 +405,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
       double Fx2=Vcc*Ginel_C + Vt*Ginel_T + Vll*Ginel_LL + 2*Vcl*Ginel_CL + inu*2*Vt_p*Ginel_Tp;
 
       //Definition of Sigma0 and units
-      double unit=hc*hc*1E-26; //to transform to cm^2/GeV/str dsdomegadKp
+      //double unit=hc*hc*1E-26; //to transform to cm^2/GeV/str dsdomegadKp
       double sigma0=vo*(GF*GF*cos_cabibbo*cos_cabibbo*xkp*xkp)/(8*pi*pi*ener1*ener2);
 
       // cout << "Fx2 " << Fx2 << " unit " << unit << " sigma0 " << sigma0 << endl;
@@ -409,7 +413,9 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
 
       //CROSS SECTION
 
-    double   CS_inel=sigma0*Fx2*unit;
+    //double   CS_inel=sigma0*Fx2*unit;
+    
+    double CS_inel=sigma0*Fx2/ ( units::cm2);
    
 
    //cout <<"d^2 sigma/d Omega d k{^prime} (cm^2/GeV/str) " <<CS_inel << endl;
@@ -476,6 +482,31 @@ void genie::SuSAv2InelPXSec::LoadConfig()
   // TODO: read in the Fermi momentum in the usual GENIE way
   this->GetParam( "FermiMomentum", pF );
   //this->GetParam( "FermiMomentumTable", fKFTable );
+  
+  //this->GetParam("Eshift",esep);
+  
+   this->GetParam("Eshift-inel",shifte);
+  
+    this->GetParam("InvariantMass",xW);
+    
+   this->GetParam("param-RMF-1",a1);
+     this->GetParam("param-RMF-2",a2);
+    this->GetParam("param-RMF-3",a3);     
+    this->GetParam("param-RMF-4",a4);   
+    
+    this->GetParam("param-RPWIA-1",b1);
+    this->GetParam("param-RPWIA-2",b2);
+    this->GetParam("param-RPWIA-3",b3);     
+    this->GetParam("param-RPWIA-4",b4);
+    this->GetParam("param-RPWIA-5",b5);
+    this->GetParam("param-RPWIA-6",b6);
+    
+     this->GetParam("param-transit-q-1",qi0);    
+    this->GetParam("param-transit-q-2",qi1);        
+    this->GetParam("param-transit-q-3",qi00);    
+    this->GetParam("param-transit-q-4",qi11);        
+    this->GetParam("param-transit-w",w0);     
+    
 
   std::string struc_func_file_name;
   this->GetParam( "InelStrucFuncFile", struc_func_file_name );

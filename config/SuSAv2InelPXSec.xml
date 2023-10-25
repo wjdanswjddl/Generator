@@ -26,7 +26,39 @@ XSec-Integrator             alg     No
     <param type="double" name="RES-EM-XSecScale"> 1.000 </param>
 
     <param type="double" name="FermiMomentum"> 0.236 </param>
-
+    
+    <!--  <param type="double" name="Eshift"> 0.02 </param> 
+      -->
+    
+    <param type="double" name="Eshift-inel"> -5 </param>
+    
+    <param type="double" name="InvariantMass"> 1.23 </param>
+    
+    
+    
+    
+    <param type="double" name="param-RMF-1"> 0.89225 </param>   
+    <param type="double" name="param-RMF-2"> 0.657214 </param>
+    <param type="double" name="param-RMF-3"> 0.170801 </param>
+    <param type="double" name="param-RMF-4"> -0.750098 </param>
+    
+   
+   
+      <param type="double" name="param-RPWIA-1"> -0.892196 </param> 
+      <param type="double" name="param-RPWIA-2"> 520.898 </param>    
+      <param type="double" name="param-RPWIA-3"> -2906.94 </param>    
+      <param type="double" name="param-RPWIA-4"> 6475.57 </param>   
+      <param type="double" name="param-RPWIA-5"> 1.74049 </param>   
+      <param type="double" name="param-RPWIA-6"> 0.64559 </param> 
+       
+     
+      <param type="double" name="param-transit-q-1"> 533.989 </param>   
+      <param type="double" name="param-transit-q-2"> 0.651644 </param>        
+      <param type="double" name="param-transit-q-3"> 494.439 </param>        
+      <param type="double" name="param-transit-q-4"> 0.706034 </param>   
+      <param type="double" name="param-transit-w"> 0.2 </param>  
+          
+          
     <!-- Inelastic structure functions from
     A. Bodek and J. L. Ritchie, Phys. Rev. D 24, 1400 (1981).
     A. Bodek and J. L. Ritchie, Phys. Rev. D 23, 1070 (1981).
