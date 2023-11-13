@@ -23,13 +23,12 @@
 // GENIE includes
 #include "Framework/Algorithm/AlgFactory.h"
 #include "Framework/Algorithm/AlgConfigPool.h"
+#include "Framework/Conventions/Units.h"
+#include "Framework/Conventions/Constants.h"
 #include "Framework/Messenger/Messenger.h"
 #include "Framework/ParticleData/PDGCodes.h"
 #include "Framework/ParticleData/PDGUtils.h"
 #include "Physics/Resonance/XSection/SuSAv2InelPXSec.h"
-#include "Framework/Conventions/Units.h"
-#include "Framework/Conventions/Constants.h"
-
 
 namespace {
 
@@ -427,9 +426,8 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
 double genie::SuSAv2InelPXSec::Integral(
   const genie::Interaction* interaction ) const
 {
-  return 0.;
-  //double xsec = fXSecIntegrator->Integrate( this, interaction );
-  //return xsec;
+  double xsec_tot = fXSecIntegrator->Integrate( this, interaction );
+  return xsec_tot;
 }
 //____________________________________________________________________________
 bool genie::SuSAv2InelPXSec::ValidProcess(
@@ -509,10 +507,10 @@ void genie::SuSAv2InelPXSec::LoadConfig()
 
   this->LoadStructureFunctions( struc_func_file_name );
 
-  //// load the differential cross section integrator
-  //fXSecIntegrator =
-  //    dynamic_cast<const XSecIntegratorI *> (this->SubAlg("XSec-Integrator"));
-  //assert(fXSecIntegrator);
+  // Load the cross section integrator
+  fXSecIntegrator = dynamic_cast< const genie::XSecIntegratorI* >(
+    this->SubAlg("XSec-Integrator") );
+  assert( fXSecIntegrator );
 }
 //____________________________________________________________________________
 void genie::SuSAv2InelPXSec::LoadStructureFunctions(

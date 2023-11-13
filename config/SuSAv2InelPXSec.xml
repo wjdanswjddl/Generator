@@ -20,8 +20,12 @@ XSec-Integrator             alg     No
 
   <param_set name="Default"> 
     
-    <param type="string" name="CommonParam"> WeakInt,NonResBackground,CKM,FermiGas </param>
+    <param type="string" name="CommonParam">
+      WeakInt,NonResBackground,CKM,FermiGas </param>
     
+    <param type="alg"  name="XSec-Integrator"> genie::SuSAv2InelXSec/Default
+      </param>
+
     <param type="double" name="RES-CC-XSecScale"> 1.000 </param>
     <param type="double" name="RES-EM-XSecScale"> 1.000 </param>
 
@@ -49,22 +53,24 @@ XSec-Integrator             alg     No
     <param type="double" name="param-transit-q-4"> 0.706034 </param>   
     <param type="double" name="param-transit-w"> 0.2 </param>  
           
-          
     <!-- Inelastic structure functions from
     A. Bodek and J. L. Ritchie, Phys. Rev. D 24, 1400 (1981).
     A. Bodek and J. L. Ritchie, Phys. Rev. D 23, 1070 (1981).
     !-->
-    <param type="string" name="InelStrucFuncFile"> StructureFunction_wi_BR.dat </param>
+    <param type="string" name="InelStrucFuncFile"> StructureFunction_wi_BR.dat
+      </param>
 
     <!-- Inelastic structure functions from
     M. E. Christy and P. E. Bosted, Phys. Rev. C 81, 055213 (2010)
     P. E. Bosted and M. E. Christy, Phys. Rev. C 77, 065206 (2008)
-    <param type="string" name="InelStrucFuncFile"> StructureFunction_wi_BC.dat </param>
+    <param type="string" name="InelStrucFuncFile"> StructureFunction_wi_BC.dat
+      </param>
     -->
 
     <!-- Inelastic structure functions from
      M. Gluck, E. Reya and A. Vogt, Eur. Phys. J. C 5, 461 (1998)
-    <param type="string" name="InelStrucFuncFile"> StructureFunction_wi_PDF.dat </param>
+    <param type="string" name="InelStrucFuncFile"> StructureFunction_wi_PDF.dat
+      </param>
     -->
 
   </param_set>

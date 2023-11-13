@@ -34,6 +34,7 @@
 // GENIE includes
 #include "Framework/EventGen/XSecAlgorithmI.h"
 //#include "Framework/ParticleData/BaryonResonance.h"
+#include "Physics/XSectionIntegration/XSecIntegratorI.h"
 
 namespace genie {
 
@@ -78,6 +79,8 @@ private:
   double a1, a2, a3, a4;
   double b1, b2, b3, b4, b5, b6;
   double qi0, qi1, qi00, qi11, w0;
+
+  const XSecIntegratorI* fXSecIntegrator;
 };
 
 }       // genie namespace

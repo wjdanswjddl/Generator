@@ -170,6 +170,7 @@
    <config alg="genie::HELeptonXSec">                HELeptonXSec.xml                </config>
    <config alg="genie::HEDISXSec">                   HEDISXSec.xml                   </config>
    <config alg="genie::BostedChristyEMPXSec">        BostedChristyEMPXSec.xml        </config>
+   <config alg="genie::SuSAv2InelXSec">              SuSAv2InelXSec.xml              </config>
 
    <!--  ****** CONFIGURATION FOR XSEC ALGORITHMS ****** -->
    <config alg="genie::AhrensNCELPXSec">                    AhrensNCELPXSec.xml                    </config>
