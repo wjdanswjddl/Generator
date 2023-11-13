@@ -74,8 +74,8 @@ private:
   std::vector< double > w3pvec;
   std::vector< double > w3nvec;
 
-  double pF,shifte,esep,xW;
-   double a1, a2, a3, a4;
+  double pF, shifte, esep;
+  double a1, a2, a3, a4;
   double b1, b2, b3, b4, b5, b6;
   double qi0, qi1, qi00, qi11, w0;
 };

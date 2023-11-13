@@ -65,9 +65,8 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
   // Get kinematical parameters
   const genie::Kinematics& kinematics = interaction->Kine();
 
-  // TODO: make the calculation differential in this variable as well
   // Hadronic invariant mass
-  //double W = kinematics.W();
+  double W = kinematics.W();
 
   // Final lepton kinetic energy
   double Tl = kinematics.GetKV( genie::kKVTl );
@@ -176,7 +175,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
   /* INELASTIC RESPONSES
      We look in the files the value of Q² that is closest to the one which we have according
      to exchange momentum and exchange energy. */
-     
+
 
     int j=0;
      for (int m=0; m<1002000; ++m)
@@ -190,12 +189,12 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
    // We search the value of the invariant mass that it is the closest to the upper limit that the kinematics gave us.
 
     int f=0;
-     for (int i=0; i<1000; ++i)
-     {
-        if(xW>=Wvec[i + n_step]&& xW<=Wvec[i + n_step +1]) break;
-        f=f+1;
-     }
-       int i_step=f;
+    for ( int i = 0; i < 1000; ++i )
+    {
+       if ( W >= Wvec[i + n_step] && W <= Wvec[i + n_step + 1] ) break;
+       ++f;
+    }
+    int i_step = f;
 
    //    cout << n_step <<" " << i_step << endl;
 
@@ -300,7 +299,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
          double a2=0.657214; // +/- 0.01588 (2.416 %)
          double a3=0.170801; // +/- 0.02409 (14.11 %)
          double a4=-0.750098; //+/- 0.08646 (11.53 %) */
-          
+
          // Eshift_RMF
          double Eshift_RMF=-15.506 + 0.0548*xq + shifte;
          if (Eshift_RMF<0 && shifte>0) Eshift_RMF=0;
@@ -337,7 +336,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
           double b4=6475.57; //+/- 5.112E4 (789.4 %)
           double b5=1.74049; //+/- 1.767 (101.5 %)
           double b6=0.64559; // +/- 0.3952 (61.21 %) */
-          
+
 
           // Eshift_RPWIA
           double Eshift_RPWIA=25.164 + 0.0112*xq +shifte;
@@ -414,9 +413,9 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
       //CROSS SECTION
 
     //double   CS_inel=sigma0*Fx2*unit;
-    
+
     double CS_inel=sigma0*Fx2/ ( units::cm2);
-   
+
 
    //cout <<"d^2 sigma/d Omega d k{^prime} (cm^2/GeV/str) " <<CS_inel << endl;
 
@@ -482,31 +481,28 @@ void genie::SuSAv2InelPXSec::LoadConfig()
   // TODO: read in the Fermi momentum in the usual GENIE way
   this->GetParam( "FermiMomentum", pF );
   //this->GetParam( "FermiMomentumTable", fKFTable );
-  
-  //this->GetParam("Eshift",esep);
-  
-   this->GetParam("Eshift-inel",shifte);
-  
-    this->GetParam("InvariantMass",xW);
-    
-   this->GetParam("param-RMF-1",a1);
-     this->GetParam("param-RMF-2",a2);
-    this->GetParam("param-RMF-3",a3);     
-    this->GetParam("param-RMF-4",a4);   
-    
-    this->GetParam("param-RPWIA-1",b1);
-    this->GetParam("param-RPWIA-2",b2);
-    this->GetParam("param-RPWIA-3",b3);     
-    this->GetParam("param-RPWIA-4",b4);
-    this->GetParam("param-RPWIA-5",b5);
-    this->GetParam("param-RPWIA-6",b6);
-    
-     this->GetParam("param-transit-q-1",qi0);    
-    this->GetParam("param-transit-q-2",qi1);        
-    this->GetParam("param-transit-q-3",qi00);    
-    this->GetParam("param-transit-q-4",qi11);        
-    this->GetParam("param-transit-w",w0);     
-    
+
+  //this->GetParam( "Eshift",esep );
+
+  this->GetParam( "Eshift-inel", shifte );
+
+  this->GetParam( "param-RMF-1", a1 );
+  this->GetParam( "param-RMF-2", a2 );
+  this->GetParam( "param-RMF-3", a3 );
+  this->GetParam( "param-RMF-4", a4 );
+
+  this->GetParam( "param-RPWIA-1", b1 );
+  this->GetParam( "param-RPWIA-2", b2 );
+  this->GetParam( "param-RPWIA-3", b3 );
+  this->GetParam( "param-RPWIA-4", b4 );
+  this->GetParam( "param-RPWIA-5", b5 );
+  this->GetParam( "param-RPWIA-6", b6 );
+
+  this->GetParam( "param-transit-q-1", qi0 );
+  this->GetParam( "param-transit-q-2", qi1 );
+  this->GetParam( "param-transit-q-3", qi00 );
+  this->GetParam( "param-transit-q-4", qi11 );
+  this->GetParam( "param-transit-w", w0 );
 
   std::string struc_func_file_name;
   this->GetParam( "InelStrucFuncFile", struc_func_file_name );
