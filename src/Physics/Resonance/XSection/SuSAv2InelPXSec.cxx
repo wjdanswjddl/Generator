@@ -426,7 +426,40 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
 double genie::SuSAv2InelPXSec::Integral(
   const genie::Interaction* interaction ) const
 {
-  double xsec_tot = fXSecIntegrator->Integrate( this, interaction );
+  const genie::InitialState& init_state = interaction->InitState();
+  double xmil = interaction->FSPrimLepton()->Mass();
+  double ev = init_state.ProbeE( genie::kRfLab );
+  double pi = std::acos( -1.0 );
+  double rmn=genie::constants::kNucleonMass; 
+  double W_min= rmn + genie::constants::kPionMass;
+  double W_max= ev - rmn;
+  double W_step=(W_max - W_min)/100;
+
+  double Suma_Tl=0.0;
+  for(int i=0; i<100; i++)
+  {
+  double Tl=i*(ev - xmil)/100;
+  double Suma_cos=0.0;
+  for (int j=0; j<100; j++)
+  {
+  double costh=-1.00 + j*2.00/100;
+  double Suma_W=0.0;
+  for(int z=0; z<100; z++)
+  {
+  double W=W_min + W_step*z;
+  interaction->KinePtr()->SetKV( genie::kKVTl, Tl );
+  interaction->KinePtr()->SetKV( genie::kKVctl, costh );
+  interaction->KinePtr()->SetW( W );
+
+  double xsec = XSec( interaction, genie::kPSTlctl );
+  if(isnan(xsec)) xsec=0.0;
+  Suma_W=Suma_W + 2*pi*W*xsec*W_step/pow(rmn,2);
+  }
+  Suma_cos=Suma_cos + Suma_W*2.00/100;
+  }
+  Suma_Tl= Suma_Tl + Suma_cos*(ev-xmil)/100; 
+  }
+  double xsec_tot=Suma_Tl;
   return xsec_tot;
 }
 //____________________________________________________________________________
