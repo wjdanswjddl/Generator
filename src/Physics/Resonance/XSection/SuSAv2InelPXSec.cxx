@@ -175,7 +175,9 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
      We look in the files the value of Q² that is closest to the one which we have according
      to exchange momentum and exchange energy. */
 
-
+     
+     if(W > rmn + w) return 0;
+     
     int j=0;
      for (int m=0; m<1002000; ++m)
      {
@@ -452,10 +454,9 @@ double genie::SuSAv2InelPXSec::Integral(
   double pi = std::acos( -1.0 );
   double rmn = genie::constants::kNucleonMass;
   double W_min = rmn + genie::constants::kPionMass;
-  double W_max = std::max( 0., ev - rmn );
-  double W_step = ( W_max - W_min ) / 100;
 
-  if ( W_max < W_min ) return 0.;
+
+ 
 
   double Suma_Tl = 0.0;
   for ( int i = 0; i < 100; i++ ) {
@@ -464,6 +465,11 @@ double genie::SuSAv2InelPXSec::Integral(
     for ( int j = 0; j < 100; j++ ) {
       double costh = -1.00 + j*2.00/100;
       double Suma_W = 0.0;
+        double W_max = genie::constants::kNeutronMass + ev - Tl - xmil;
+        
+          if ( W_max > W_min ) {
+        
+         double W_step = ( W_max - W_min ) / 100;
       for( int z = 0; z < 100; z++ ) {
         double W = W_min + W_step*z;
         interaction->KinePtr()->SetKV( genie::kKVTl, Tl );
@@ -473,7 +479,8 @@ double genie::SuSAv2InelPXSec::Integral(
         double xsec = XSec( interaction, genie::kPSTlctl );
 
         Suma_W = Suma_W + 2*pi*W*xsec*W_step/pow( rmn,2 );
-      }
+        }
+        } else Suma_W=0.0;
       Suma_cos = Suma_cos + Suma_W*2.00/100;
     }
     Suma_Tl = Suma_Tl + Suma_cos*( ev - xmil ) / 100;

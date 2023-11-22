@@ -94,7 +94,7 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
   // Set the kinematic limits for sampling
   // TODO: revisit these and assign better values if needed
   double W_min = genie::constants::kNeutronMass + genie::constants::kPionMass;
-  double W_max = std::max( Ev - W_min , W_min );
+
 
   double cth_min = -1.;
   double cth_max =  1.;
@@ -123,9 +123,24 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
     }
 
     // Currently sampled values of the kinematic variables of interest
-    W = W_min + ( W_max - W_min ) * rnd->RndKine().Rndm();
+
     cth = cth_min + ( cth_max - cth_min ) * rnd->RndKine().Rndm();
     Tl = Tl_min + ( Tl_max - Tl_min ) * rnd->RndKine().Rndm();
+    
+  
+      double W_max = genie::constants::kNeutronMass + Ev - Tl - ml;
+         
+         
+         while(W_min>W_max){
+     Tl = Tl_min + ( Tl_max - Tl_min ) * rnd->RndKine().Rndm();    
+     W_max = genie::constants::kNeutronMass + Ev - Tl - ml;  
+     };  
+    
+    
+    
+     W = W_min + ( W_max - W_min ) * rnd->RndKine().Rndm(); 
+     
+
 
     LOG( "SuSAv2Inel", pDEBUG ) << "Trying: W = " << W
       << ", cth = " << cth << ", Tl = " << Tl;
@@ -281,11 +296,10 @@ double genie::SuSAv2InelGenerator::ComputeMaxXSec(
   // 2D scan in W, Tl
   int num_W = 20;
   double W_min = genie::constants::kNeutronMass + genie::constants::kPionMass;
-  double W_max = std::max( Ev - W_min, 0. );
 
-  if ( W_max < W_min ) return 0.;
 
-  double dW = ( W_max - W_min ) / ( num_W - 1 );
+
+
 
   int num_Tl = 25;
   double Tl_min = 0.;
@@ -293,17 +307,25 @@ double genie::SuSAv2InelGenerator::ComputeMaxXSec(
 
   double dTl = ( Tl_max - Tl_min ) / ( num_Tl - 1 );
 
-  for ( int iw = 0; iw < num_W; ++iw ) {
+  for ( int iTl = 0; iTl < num_Tl; ++iTl ) {
+     double Tl = Tl_min + iTl*dTl;
+        interaction->KinePtr()->SetKV( genie::kKVTl, Tl );
+     
+        double W_max = genie::constants::kNeutronMass + Ev - Tl - ml;
 
-    double W = W_min + iw*dW;
+
+     double dW = ( W_max - W_min ) / ( num_W - 1 );
+    for ( int iw = 0; iw < num_W; ++iw ) {
+
+     double W = W_min + iw*dW;
     interaction->KinePtr()->SetW( W );
 
-    for ( int iTl = 0; iTl < num_Tl; ++iTl ) {
-
-      double Tl = Tl_min + iTl*dTl;
-      interaction->KinePtr()->SetKV( genie::kKVTl, Tl );
+       
 
       double xsec = fXSecModel->XSec( interaction, kPSTlctl );
+       if ( W_max < W_min ) xsec=0;
+      
+      
       LOG( "SuSAv2Inel", pDEBUG ) << "xsec(W= " << W << ", Tl= " << Tl
         << ", cth = " << cth << ") = " << xsec;
       max_xsec = std::max( xsec, max_xsec );
