@@ -15,4 +15,7 @@
 #pragma link C++ class genie::RSPPResonanceSelector;
 #pragma link C++ class genie::RSPPInteractionListGenerator;
 
+#pragma link C++ class genie::SuSAv2InelGenerator;
+#pragma link C++ class genie::SuSAv2InelInteractionListGenerator;
+
 #endif

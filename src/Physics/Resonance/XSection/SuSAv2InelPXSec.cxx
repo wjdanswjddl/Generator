@@ -418,6 +418,24 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
 
    //cout <<"d^2 sigma/d Omega d k{^prime} (cm^2/GeV/str) " <<CS_inel << endl;
 
+
+   // If the hit nucleon PDG code is set, scale by N/A (neutron) or Z/A
+   // so that the inclusive prediction is recovered for the sum of the
+   // hit-nucleon-specific xsecs
+   if ( target.HitNucIsSet() ) {
+     int hit_nuc_pdg = target.HitNucPdg();
+     if ( genie::pdg::IsNeutron(hit_nuc_pdg) ) {
+       CS_inel *= static_cast< double >( Anumber - Znumber ) / Anumber;
+     }
+     else if ( genie::pdg::IsProton(hit_nuc_pdg) ) {
+       CS_inel *= static_cast< double >( Znumber ) / Anumber;
+     }
+     else {
+       LOG( "SuSAv2Inel", pERROR ) << "Unrecognized hit nucleon PDG code";
+       CS_inel = 0.;
+     }
+   }
+
    return CS_inel;
 }
 // END CODE FROM JESUS
@@ -430,10 +448,12 @@ double genie::SuSAv2InelPXSec::Integral(
   double xmil = interaction->FSPrimLepton()->Mass();
   double ev = init_state.ProbeE( genie::kRfLab );
   double pi = std::acos( -1.0 );
-  double rmn=genie::constants::kNucleonMass; 
+  double rmn=genie::constants::kNucleonMass;
   double W_min= rmn + genie::constants::kPionMass;
-  double W_max= ev - rmn;
+  double W_max= std::max( 0., ev - rmn );
   double W_step=(W_max - W_min)/100;
+
+  if ( W_max < W_min ) return 0.;
 
   double Suma_Tl=0.0;
   for(int i=0; i<100; i++)
@@ -457,7 +477,8 @@ double genie::SuSAv2InelPXSec::Integral(
   }
   Suma_cos=Suma_cos + Suma_W*2.00/100;
   }
-  Suma_Tl= Suma_Tl + Suma_cos*(ev-xmil)/100; 
+  Suma_Tl= Suma_Tl + Suma_cos*(ev-xmil)/100;
+
   }
   double xsec_tot=Suma_Tl;
   return xsec_tot;

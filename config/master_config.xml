@@ -66,6 +66,7 @@
    <config alg="genie::CEvNSEventGenerator">             CEvNSEventGenerator.xml             </config>
    <config alg="genie::COHDNuEventGenerator">            COHDNuEventGenerator.xml            </config>
    <config alg="genie::QELEventGeneratorSuSA">           QELEventGeneratorSuSA.xml           </config>
+   <config alg="genie::SuSAv2InelGenerator">             SuSAv2InelGenerator.xml             </config>
    <config alg="genie::NucleonDecayPrimaryVtxGenerator"> NucleonDecayPrimaryVtxGenerator.xml </config>
    <config alg="genie::NNBarOscPrimaryVtxGenerator">     NNBarOscPrimaryVtxGenerator.xml     </config>
    <config alg="genie::SpectralFunction2p2h">            SpectralFunction2p2h.xml            </config>
@@ -79,6 +80,7 @@
    <config alg="genie::QELInteractionListGenerator">           QELInteractionListGenerator.xml       </config>
    <config alg="genie::RSPPInteractionListGenerator">          RSPPInteractionListGenerator.xml      </config>
    <config alg="genie::RESInteractionListGenerator">           RESInteractionListGenerator.xml       </config>
+   <config alg="genie::SuSAv2InelInteractionListGenerator">    SuSAv2InelInteractionListGenerator.xml</config>
    <config alg="genie::DISInteractionListGenerator">           DISInteractionListGenerator.xml       </config>
    <config alg="genie::NuEInteractionListGenerator">           NuEInteractionListGenerator.xml       </config>
    <config alg="genie::DMEInteractionListGenerator">           DMEInteractionListGenerator.xml       </config>

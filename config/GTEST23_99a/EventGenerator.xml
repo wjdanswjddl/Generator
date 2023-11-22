@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<alg_conf>
+
+  <param_set name="RES-CC">
+     <param type="string" name="VldContext"> </param>
+     <param type="int"    name="NModules"> 3 </param>
+     <param type="alg"    name="Module-0"> genie::InitialStateAppender/Default                   </param>
+     <param type="alg"    name="Module-1"> genie::VertexGenerator/Default                        </param>
+     <param type="alg"    name="Module-2"> genie::SuSAv2InelGenerator/Default                    </param>
+     <param type="alg"    name="ILstGen">  genie::SuSAv2InelInteractionListGenerator/Default </param>
+  </param_set>
+ 
+</alg_conf>
