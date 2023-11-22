@@ -413,10 +413,10 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
 
     //double   CS_inel=sigma0*Fx2*unit;
 
-    double CS_inel=sigma0*Fx2/ ( units::cm2);
+    double CS_inel = sigma0 * Fx2;
 
-
-   //cout <<"d^2 sigma/d Omega d k{^prime} (cm^2/GeV/str) " <<CS_inel << endl;
+   //cout <<"d^2 sigma/d Omega d k{^prime} (GeV^{-2}/GeV/str) "
+   //  <<CS_inel << endl;
 
 
    // If the hit nucleon PDG code is set, scale by N/A (neutron) or Z/A
