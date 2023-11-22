@@ -137,7 +137,6 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
 
     // Compute the differential cross section for the current kinematics
     xsec = fXSecModel->XSec( interaction, genie::kPSTlctl );
-    if ( std::isnan(xsec) ) xsec = 0.;
 
     LOG( "SuSAv2Inel", pDEBUG ) << "xsec = " << xsec;
 
