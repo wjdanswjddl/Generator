@@ -79,6 +79,7 @@ private:
   double a1, a2, a3, a4;
   double b1, b2, b3, b4, b5, b6;
   double qi0, qi1, qi00, qi11, w0;
+  double cos_cabibbo;
 
   const XSecIntegratorI* fXSecIntegrator;
 };

@@ -117,37 +117,24 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
 
   // Constants
   double pi = std::acos( -1.0 );
- // double hc=genie::units::hbarc/1.e-15; //    0.197327; //GeV*fm
-  double GF=genie::constants::kGF;     //1.16639E-5; //Cte Fernu, en GeV**-2
-  double cos_cabibbo=0.97429; // Cabibbo angle
-  //double rmProton=0.93827231;
-  //double rmNeutron=0.9395657;
-  double rmn=genie::constants::kNucleonMass;               //(rmProton + rmNeutron)/2.0; //GeV
+  double GF = genie::constants::kGF; //1.16639E-5; //Cte Fernu, en GeV**-2
+  double rmn = genie::constants::kNucleonMass; //(rmProton + rmNeutron)/2.0;
+
   // Fermi momentum
-  double etaF=pF/rmn;
-  double epsF=sqrt(1.0 + etaF*etaF);
-  double xiF=epsF - 1.0;
-//  double rmpi=0.14; //GeV
- //double esep;
+  double etaF = pF / rmn;
+  double epsF = std::sqrt( 1.0 + etaF*etaF );
+  double xiF = epsF - 1.0;
 
+  //KINEMATICS
+  double ener2 = ener1 - w; // Energy of the lepton
+  double xkp = std::sqrt( ener2*ener2 - xmil*xmil ); // Momentum of the lepton
+  double Q2 = w*w - q*q; //Four-momentum
+  double vo = 4*ener1*ener2 + Q2;
 
-  //cout << pi << " , " << epsF << " , " << W_end << endl;
-
-   //KINEMATICS
-   double ener2=ener1 - w; //Energy of the lepton
-   double xkp=sqrt(ener2*ener2 - xmil*xmil); //Momentum of the lepton
-   double Q2=w*w - q*q; //Four-momentum
-  double vo=4*ener1*ener2 + Q2;
-  // double vo=pow((ener1 + ener2),2) - pow(q,2);
   // Scaling and Adimensional variables
-   double xk=q/(2*rmn);
-   double xlambda=w/(2*rmn);
-   double tau= pow(xk,2) - pow(xlambda,2);
-
-   // double tau=-Q2/(4*rmn*rmn);
-   //double psi=(1/sqrt(xiF))*(xlambda*tau)/sqrt( (1+ xlambda)*tau + xk*sqrt(tau*(tau + 1)))
-
-   //cout << xk << ", " << xlambda << " , " << tau << endl;
+  double xk = q / ( 2 * rmn );
+  double xlambda = w / ( 2 * rmn );
+  double tau = std::pow( xk, 2 ) - std::pow( xlambda, 2 );
 
    /* LEPTONIC KINEMATICAL FACTOR
 
@@ -560,6 +547,10 @@ void genie::SuSAv2InelPXSec::LoadConfig()
   this->GetParam( "param-transit-q-3", qi00 );
   this->GetParam( "param-transit-q-4", qi11 );
   this->GetParam( "param-transit-w", w0 );
+
+  double ang_cabibbo;
+  this->GetParam( "CabibboAngle", ang_cabibbo );
+  cos_cabibbo = std::cos( ang_cabibbo );
 
   std::string struc_func_file_name;
   this->GetParam( "InelStrucFuncFile", struc_func_file_name );
