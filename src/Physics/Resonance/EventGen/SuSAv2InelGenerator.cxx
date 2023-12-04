@@ -30,6 +30,12 @@
 #include "Framework/Utils/KineUtils.h"
 #include "Physics/Resonance/EventGen/SuSAv2InelGenerator.h"
 
+namespace {
+
+  enum HadronicFSChoice { Unknown, DeltaRES, OtherRES, DIS };
+
+}
+
 //___________________________________________________________________________
 genie::SuSAv2InelGenerator::SuSAv2InelGenerator()
   : genie::KineGeneratorWithCache( "genie::SuSAv2InelGenerator" )
@@ -58,7 +64,7 @@ void genie::SuSAv2InelGenerator::ProcessEventRecord( GHepRecord* evrec ) const
 
   this->SelectLeptonKinematics( evrec );
 
-  // TODO: construct the hadronic final state here
+  this->MakeHadronicFinalState( evrec );
 }
 
 //___________________________________________________________________________
@@ -251,6 +257,18 @@ void genie::SuSAv2InelGenerator::LoadConfig()
   // section used in rejection method
   this->GetParamDef( "MaxXSec-DiffTolerance", fMaxXSecDiffTolerance, 999999. );
   assert( fMaxXSecDiffTolerance >= 0. );
+
+  // Get sub-algorithm that handles preparation of RES final states
+  fRESHadronGenerator = dynamic_cast< const EventRecordVisitorI* >(
+    this->SubAlg( "RESHadronGenerator" )
+  );
+  assert( fRESHadronGenerator );
+
+  // Get sub-algorithm that handles preparation of DIS final states
+  fDISHadronGenerator = dynamic_cast< const EventRecordVisitorI* >(
+    this->SubAlg( "DISHadronGenerator" )
+  );
+  assert( fDISHadronGenerator );
 }
 
 //____________________________________________________________________________
@@ -343,4 +361,85 @@ double genie::SuSAv2InelGenerator::ComputeMaxXSec(
   max_xsec *= fSafetyFactor;
 
   return max_xsec;
+}
+//___________________________________________________________________________
+void genie::SuSAv2InelGenerator::MakeHadronicFinalState( GHepRecord* evrec )
+  const
+{
+  HadronicFSChoice my_choice = HadronicFSChoice::Unknown;
+
+  // The SuSAv2 calculation is for the inclusive cross section, so we adopt
+  // an ad hoc procedure for deciding whether to generate a final state
+  // based on GENIE's native RES or DIS treatment.
+  genie::Interaction* interaction = evrec->Summary();
+  double Q2 = interaction->Kine().Q2( true );
+  double W = interaction->Kine().W( true );
+  double Ev = interaction->InitState().ProbeE( genie::kRfLab );
+
+  // If Q^2 or W is above one of these thresholds, unconditionally treat the
+  // event as DIS
+  // TODO: remove hard-coded kinematic limits in this function (make them
+  // configurable via XML)
+  // TODO: also adjust to respect existing W cut in CommonParam.xml
+  if ( Q2 > 3.0 || W > 2.1 ) {
+    my_choice = HadronicFSChoice::DIS;
+  }
+  // If W is below this threshold, assume pure RES through the Delta resonance
+  else if ( W < 1.4 ) {
+    my_choice = DeltaRES;
+    interaction->ExclTagPtr()->SetResonance( genie::EResonance::kP33_1232 );
+    fRESHadronGenerator->ProcessEventRecord( evrec );
+  }
+  else {
+    // We are in the intermediate region of W, so consider a mixture of RES and
+    // DIS interactions
+    double ratio_other_RES = 0.085 * Ev + 0.045;
+    double ratio_DIS = std::max( 0., -0.053 * Ev + 0.5183 );
+    double ratio_Delta_RES = std::max( 0., 1. - ratio_other_RES - ratio_DIS );
+    double sum_ratios = ratio_other_RES + ratio_DIS + ratio_Delta_RES;
+
+    // Get access to the random number generators
+    genie::RandomGen* rnd = RandomGen::Instance();
+
+    // Choose a channel based on the relative probabilities
+    double rand = sum_ratios * rnd->RndKine().Rndm();
+    if ( rand <= ratio_Delta_RES ) {
+      my_choice = HadronicFSChoice::DeltaRES;
+    }
+    else if ( rand <= ratio_Delta_RES + ratio_DIS ) {
+      my_choice = HadronicFSChoice::DIS;
+    }
+    else {
+      my_choice = HadronicFSChoice::OtherRES;
+    }
+  }
+
+  // Delegate handling of the hadronic final state to the appropriate
+  // sub-algorithm. In the case of "other RES," first choose the resonance to
+  // use
+  switch ( my_choice ) {
+    case HadronicFSChoice::DIS: {
+      fDISHadronGenerator->ProcessEventRecord( evrec );
+      break;
+    }
+    case HadronicFSChoice::DeltaRES: {
+      interaction->ExclTagPtr()->SetResonance( genie::EResonance::kP33_1232 );
+      fRESHadronGenerator->ProcessEventRecord( evrec );
+      break;
+    }
+    case HadronicFSChoice::OtherRES: {
+      // TODO: implement this part!
+      break;
+    }
+    default: {
+      LOG( "SuSAv2Inel", pERROR )
+        << "*** Failed to select valid hadronic final state";
+      evrec->EventFlags()->SetBitNumber( genie::kHadroSysGenErr, true );
+      genie::exceptions::EVGThreadException exception;
+      exception.SetReason( "Couldn't select hadronic final state" );
+      exception.SwitchOnFastForward();
+      throw exception;
+    }
+  }
+
 }

@@ -52,11 +52,15 @@ private:
   void LoadConfig();
 
   void SelectLeptonKinematics( GHepRecord* evrec ) const;
+  void MakeHadronicFinalState( GHepRecord* evrec ) const;
 
   double ComputeMaxXSec( const Interaction* interaction ) const;
 
   double fWcut; ///< Wcut parameter in DIS/RES joining scheme
   double fSafetyFactor;
+
+  const EventRecordVisitorI* fRESHadronGenerator;
+  const EventRecordVisitorI* fDISHadronGenerator;
 };
 
 }      // genie namespace
