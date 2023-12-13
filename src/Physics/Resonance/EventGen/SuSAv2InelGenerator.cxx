@@ -67,15 +67,6 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
   genie::Interaction* interaction = evrec->Summary();
   interaction->SetBit( genie::kISkipProcessChk );
 
-  // Check whether this is an EM or weak (CC only for now) process
-  bool is_em = interaction->ProcInfo().IsEM();
-
-  // Choose the appropriate minimum Q^2 value based on the interaction
-  // mode (this is important for EM interactions since the differential
-  // cross section blows up as Q^2 --> 0)
-  double Q2min = genie::controls::kMinQ2Limit; // CC/NC limit
-  if ( is_em ) Q2min = genie::utils::kinematics::electromagnetic::kMinQ2Limit;
-
   // Get access to the random number generators
   genie::RandomGen* rnd = RandomGen::Instance();
 
@@ -126,21 +117,11 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
 
     cth = cth_min + ( cth_max - cth_min ) * rnd->RndKine().Rndm();
     Tl = Tl_min + ( Tl_max - Tl_min ) * rnd->RndKine().Rndm();
-    
-  
-      double W_max = genie::constants::kNeutronMass + Ev - Tl - ml;
-         
-         
-         while(W_min>W_max){
-     Tl = Tl_min + ( Tl_max - Tl_min ) * rnd->RndKine().Rndm();    
-     W_max = genie::constants::kNeutronMass + Ev - Tl - ml;  
-     };  
-    
-    
-    
-     W = W_min + ( W_max - W_min ) * rnd->RndKine().Rndm(); 
-     
 
+    double W_max = genie::constants::kNeutronMass + Ev - Tl - ml;
+    if ( W_max < W_min ) continue;
+
+    W = W_min + ( W_max - W_min ) * rnd->RndKine().Rndm();
 
     LOG( "SuSAv2Inel", pDEBUG ) << "Trying: W = " << W
       << ", cth = " << cth << ", Tl = " << Tl;
@@ -158,6 +139,8 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
     // Do the usual check for rejection sampling of the kinematics
     double y = xsec_max * rnd->RndKine().Rndm();
     accept = (y < xsec);
+
+    LOG( "SuSAv2Inel", pDEBUG ) << "xsec_max = " << xsec_max << ", y = " << y;
 
     // Double-check that the precomputed maximum differential cross section
     // wasn't exceeded by the current one (otherwise we have a rejection
@@ -193,10 +176,6 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
       // Compute the 4-momentum transfer and Q^2
       TLorentzVector q4 = p4v - p4l;
       Q2 = -1. * q4.Mag2();
-
-      // If we're below the minimum Q^2 value, then just go back to rejection
-      // sampling
-      if ( Q2 < Q2min ) continue;
 
       // Reset the 'trust' bits before exiting the loop
       interaction->ResetBit( kISkipProcessChk );
@@ -310,7 +289,7 @@ double genie::SuSAv2InelGenerator::ComputeMaxXSec(
   for ( int iTl = 0; iTl < num_Tl; ++iTl ) {
      double Tl = Tl_min + iTl*dTl;
         interaction->KinePtr()->SetKV( genie::kKVTl, Tl );
-     
+
         double W_max = genie::constants::kNeutronMass + Ev - Tl - ml;
 
 
@@ -320,12 +299,12 @@ double genie::SuSAv2InelGenerator::ComputeMaxXSec(
      double W = W_min + iw*dW;
     interaction->KinePtr()->SetW( W );
 
-       
+
 
       double xsec = fXSecModel->XSec( interaction, kPSTlctl );
        if ( W_max < W_min ) xsec=0;
-      
-      
+
+
       LOG( "SuSAv2Inel", pDEBUG ) << "xsec(W= " << W << ", Tl= " << Tl
         << ", cth = " << cth << ") = " << xsec;
       max_xsec = std::max( xsec, max_xsec );

@@ -23,11 +23,13 @@
 // GENIE includes
 #include "Framework/Algorithm/AlgFactory.h"
 #include "Framework/Algorithm/AlgConfigPool.h"
-#include "Framework/Conventions/Units.h"
 #include "Framework/Conventions/Constants.h"
+#include "Framework/Conventions/Controls.h"
+#include "Framework/Conventions/Units.h"
 #include "Framework/Messenger/Messenger.h"
 #include "Framework/ParticleData/PDGCodes.h"
 #include "Framework/ParticleData/PDGUtils.h"
+#include "Framework/Utils/KineUtils.h"
 #include "Physics/Resonance/XSection/SuSAv2InelPXSec.h"
 
 namespace {
@@ -76,6 +78,15 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
   // Get target nucleus information
   int Anumber = target.A();
   int Znumber = target.Z();
+
+  // Check whether this is an EM or weak (CC only for now) process
+  bool is_em = interaction->ProcInfo().IsEM();
+
+  // Choose the appropriate minimum Q^2 value based on the interaction
+  // mode (this is important for EM interactions since the differential
+  // cross section blows up as Q^2 --> 0)
+  double Q2min = genie::controls::kMinQ2Limit; // CC/NC limit
+  if ( is_em ) Q2min = genie::utils::kinematics::electromagnetic::kMinQ2Limit;
 
   // Get a sign dependent on whether we're working with neutinos or
   // antineutrinos
@@ -131,6 +142,15 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
   double Q2 = w*w - q*q; //Four-momentum
   double vo = 4*ener1*ener2 + Q2;
 
+  // Enforce the global GENIE minimum limit on Q^2. Note that the variable
+  // above has negative values (it's really q2). We therefore add a minus
+  // sign in the check.
+  // TODO: change this to avoid confusion
+  if ( -Q2 < Q2min ) {
+    LOG( "SuSAv2Inel", pWARN ) << "Q2 = " << Q2 << ", Q2min = " << Q2min;
+    return 0.;
+  }
+
   // Scaling and Adimensional variables
   double xk = q / ( 2 * rmn );
   double xlambda = w / ( 2 * rmn );
@@ -162,9 +182,9 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
      We look in the files the value of Q² that is closest to the one which we have according
      to exchange momentum and exchange energy. */
 
-     
+
      if(W > rmn + w) return 0;
-     
+
     int j=0;
      for (int m=0; m<1002000; ++m)
      {
@@ -425,7 +445,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
      }
    }
 
-   if ( std::isnan(CS_inel) ) CS_inel = 0.0;
+   if ( std::isnan(CS_inel) || CS_inel < 0. ) CS_inel = 0.0;
 
    return CS_inel;
 }
@@ -443,7 +463,7 @@ double genie::SuSAv2InelPXSec::Integral(
   double W_min = rmn + genie::constants::kPionMass;
 
 
- 
+
 
   double Suma_Tl = 0.0;
   for ( int i = 0; i < 100; i++ ) {
@@ -453,9 +473,9 @@ double genie::SuSAv2InelPXSec::Integral(
       double costh = -1.00 + j*2.00/100;
       double Suma_W = 0.0;
         double W_max = genie::constants::kNeutronMass + ev - Tl - xmil;
-        
+
           if ( W_max > W_min ) {
-        
+
          double W_step = ( W_max - W_min ) / 100;
       for( int z = 0; z < 100; z++ ) {
         double W = W_min + W_step*z;
