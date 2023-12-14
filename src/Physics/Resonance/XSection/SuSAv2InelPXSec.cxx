@@ -147,7 +147,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
   // sign in the check.
   // TODO: change this to avoid confusion
   if ( -Q2 < Q2min ) {
-    LOG( "SuSAv2Inel", pWARN ) << "Q2 = " << Q2 << ", Q2min = " << Q2min;
+    //LOG( "SuSAv2Inel", pWARN ) << "Q2 = " << -Q2 << ", Q2min = " << Q2min;
     return 0.;
   }
 

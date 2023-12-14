@@ -25,6 +25,8 @@
 #include "Framework/Numerical/MathUtils.h"
 #include "Framework/ParticleData/BaryonResonance.h"
 #include "Framework/ParticleData/BaryonResUtils.h"
+#include "Framework/ParticleData/PDGLibrary.h"
+#include "Framework/ParticleData/PDGCodes.h"
 #include "Framework/Utils/KineUtils.h"
 #include "Physics/Resonance/EventGen/SuSAv2InelGenerator.h"
 
@@ -263,53 +265,78 @@ double genie::SuSAv2InelGenerator::ComputeMaxXSec(
   // rejection method will be scaled up by a safety factor. But this needs to
   // be fast -- do not use a very fine grid.
 
-  double max_xsec = 0.;
-
   double Ev = interaction->InitState().ProbeE( genie::kRfLab );
   double ml = interaction->FSPrimLepton()->Mass();
 
-  // Use a constant cos(theta) value for now
-  const double cth = 0.9;
+  // Start with a guess of where the maximum xsec lies in phase space
+  genie::PDGLibrary* pdg_library = genie::PDGLibrary::Instance();
+  double mDelta = pdg_library->Find( genie::kPdgP33m1232_DeltaP )->Mass();
+
+  double W = mDelta;
+  double Tl = 0.9516*Ev - 0.3228;
+  double cth = std::min( 1., 0.5395*std::exp(-1.984*Ev) + 0.9956 );
+
+  interaction->KinePtr()->SetW( W );
+  interaction->KinePtr()->SetKV( genie::kKVTl, Tl );
   interaction->KinePtr()->SetKV( genie::kKVctl, cth );
 
-  // 2D scan in W, Tl
-  int num_W = 20;
-  double W_min = genie::constants::kNeutronMass + genie::constants::kPionMass;
+  double max_xsec = fXSecModel->XSec( interaction, kPSTlctl );
+  LOG( "SuSAv2Inel", pDEBUG ) << "xsec(W= " << W << ", Tl= " << Tl
+    << ", cth = " << cth << ") = " << max_xsec;
 
+  // Step around the guess in all directions with a decreasing step size,
+  // move on each iteration towards the maximum value
+  double step_W = 0.5;
+  double step_Tl = 0.5;
+  double step_cth = 0.5;
+  const int MAX_STEPS = 1000;
+  const int MIN_STEP_W = 0.01;
+  int step_iter = 0;
 
+  while ( step_iter < MAX_STEPS && step_W > MIN_STEP_W ) {
+    std::vector< double > Ws = { W - step_W, W, W + step_W };
+    std::vector< double > Tls = { Tl - step_Tl, Tl, Tl + step_Tl };
+    std::vector< double > cths = { cth - step_cth, cth, cth + step_cth };
 
+    std::vector< genie::Interaction > interaction_vec;
+    for ( const double& cur_W : Ws ) {
+      for ( const double& cur_Tl : Tls ) {
+        for ( const double& cur_cth : cths ) {
+          interaction_vec.emplace_back( *interaction );
+          auto& last_interaction = interaction_vec.back();
+          last_interaction.KinePtr()->SetW( cur_W );
+          last_interaction.KinePtr()->SetKV( genie::kKVTl, cur_Tl );
+          last_interaction.KinePtr()->SetKV( genie::kKVctl, cur_cth );
+        }
+      }
+    }
 
+    const genie::Interaction* max_inter = interaction;
+    for ( const auto& test_inter : interaction_vec ) {
+      double xsec = fXSecModel->XSec( &test_inter, kPSTlctl );
+      if ( xsec > max_xsec ) {
+        LOG( "SuSAv2Inel", pDEBUG ) << "xsec(W= " << W << ", Tl= " << Tl
+          << ", cth = " << cth << ") = " << xsec;
+        max_inter = &test_inter;
+        max_xsec = xsec;
+        W = test_inter.Kine().W();
+        Tl = test_inter.Kine().GetKV( genie::kKVTl );
+        cth = test_inter.Kine().GetKV( genie::kKVctl );
+      }
+    }
 
-  int num_Tl = 25;
-  double Tl_min = 0.;
-  double Tl_max = Ev - ml;
+    // If we found a phase-space point with a higher differential cross
+    // section, then just continue the loop. If the current choice is still
+    // best, decrease the step sizes for the next attempt.
+    if ( max_inter == interaction ) {
+      step_W /= 5.;
+      step_Tl /= 5.;
+      step_cth /= 5.;
+    }
+  }
 
-  double dTl = ( Tl_max - Tl_min ) / ( num_Tl - 1 );
-
-  for ( int iTl = 0; iTl < num_Tl; ++iTl ) {
-     double Tl = Tl_min + iTl*dTl;
-        interaction->KinePtr()->SetKV( genie::kKVTl, Tl );
-
-        double W_max = genie::constants::kNeutronMass + Ev - Tl - ml;
-
-
-     double dW = ( W_max - W_min ) / ( num_W - 1 );
-    for ( int iw = 0; iw < num_W; ++iw ) {
-
-     double W = W_min + iw*dW;
-    interaction->KinePtr()->SetW( W );
-
-
-
-      double xsec = fXSecModel->XSec( interaction, kPSTlctl );
-       if ( W_max < W_min ) xsec=0;
-
-
-      LOG( "SuSAv2Inel", pDEBUG ) << "xsec(W= " << W << ", Tl= " << Tl
-        << ", cth = " << cth << ") = " << xsec;
-      max_xsec = std::max( xsec, max_xsec );
-    } // Tl
-  } // W
+  LOG( "SuSAv2Inel", pDEBUG ) << "max_xsec(W= " << W << ", Tl= " << Tl
+    << ", cth = " << cth << ") = " << max_xsec;
 
   // Apply safety factor
   max_xsec *= fSafetyFactor;
