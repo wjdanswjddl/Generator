@@ -87,7 +87,7 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
   // Set the kinematic limits for sampling
   // TODO: revisit these and assign better values if needed
   double W_min = genie::constants::kNeutronMass + genie::constants::kPionMass;
-
+   double W_max = genie::constants::kNeutronMass + Ev;// - Tl - ml;
 
   double cth_min = -1.;
   double cth_max =  1.;
@@ -119,11 +119,11 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
 
     cth = cth_min + ( cth_max - cth_min ) * rnd->RndKine().Rndm();
     Tl = Tl_min + ( Tl_max - Tl_min ) * rnd->RndKine().Rndm();
-
-    double W_max = genie::constants::kNeutronMass + Ev - Tl - ml;
-    if ( W_max < W_min ) continue;
-
     W = W_min + ( W_max - W_min ) * rnd->RndKine().Rndm();
+ 
+    if ( W > genie::constants::kNeutronMass + Ev - Tl - ml ) continue;
+
+
 
     LOG( "SuSAv2Inel", pDEBUG ) << "Trying: W = " << W
       << ", cth = " << cth << ", Tl = " << Tl;
