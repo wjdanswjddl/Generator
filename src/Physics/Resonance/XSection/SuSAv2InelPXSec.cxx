@@ -141,6 +141,8 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
   double xkp = std::sqrt( ener2*ener2 - xmil*xmil ); // Momentum of the lepton
   double Q2 = w*w - q*q; //Four-momentum
   double vo = 4*ener1*ener2 + Q2;
+  
+  //std::cout<<" Q2 " << Q2 << std::endl;
 
   // Enforce the global GENIE minimum limit on Q^2. Note that the variable
   // above has negative values (it's really q2). We therefore add a minus
@@ -175,20 +177,23 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
    double Vt_p=(1 - xnu*xrho_p*xdelta*xdelta)*xtg/xrho_p;
   // double Vl=Vcc + 2*Vcl*xlambda/xk + Vll*pow(xlambda/xk,2);
 
-  // cout << "Vl " << Vl << " Vcc " << Vcc << " Vcl " << Vcl << " Vll "<< Vll << " Vt "<< Vt << " Vt_p "<< Vt_p <<endl;
+  // std::cout << "Vl " << Vl << " Vcc " << Vcc << " Vcl " << Vcl << " Vll "<< Vll << " Vt "<< Vt << " Vt_p "<< Vt_p <<std::endl;
 
 
   /* INELASTIC RESPONSES
      We look in the files the value of Q² that is closest to the one which we have according
      to exchange momentum and exchange energy. */
-
+    
+   // std::cout<<" W "<< W <<" "<< rmn + w<<std::endl;
 
      if(W > rmn + w) return 0;
 
     int j=0;
-     for (int m=0; m<1002000; ++m)
+     for (int m=0; m<1001000; ++m)
      {
-        if( abs(Q2)>=Q2vec[m]&&abs(Q2)<=Q2vec[m+1000]) break;
+        if( (-Q2)>=Q2vec[m] &&  (-Q2)<=Q2vec[m+1000]) break;
+        
+         //  std::cout << (-Q2) << " " << Q2vec[m] <<" "<<Q2vec[m + 1000] << " " << j << " " << Q2vec[j]/(4*rmn*rmn)<< std::endl;
            j=j+1;
      }
 
@@ -200,7 +205,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
     for ( int i = 0; i < 1000; ++i )
     {
        if ( W >= Wvec[i + n_step] && W <= Wvec[i + n_step + 1] ) break;
-       ++f;
+       f=f+1;
     }
     int i_step = f;
 
@@ -214,8 +219,10 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
         double w3_p=w3pvec[i_step + n_step];
         double w3_n=w3nvec[i_step + n_step];
 
-        //cout << "xmux "<<xmux << " tau " <<tau << " w1p " << w1_p << " w1n " << w1_n << endl;
-       // cout << "w2p " << w2_p << " w2n " << w2_n << " w3p " << w3_p << " w3n "<< w3_n<< endl;
+      //  std::cout <<i_step<<" "<<n_step<<std::endl;
+      //  std::cout << "xmux (table) "<<xmux << " tau (table) " << Q2vec[n_step]/(4*rmn*rmn) << std::endl;
+      //  std::cout<<"xmux "<<W/rmn <<" tau " <<tau << " w1p " << w1_p << " w1n " << w1_n << std::endl;
+       // std::cout << "w2p " << w2_p << " w2n " << w2_n << " w3p " << w3_p << " w3n "<< w3_n<< std::endl;
 
        // We define the inelastic psi variable, the inelasticity paraemter and the Bjorken variable
 
@@ -264,8 +271,8 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
        double ww3v=ww3isov*(18.0/5.0);
 
 
-     //  cout << "w1s " << ww1s << " w1v " << ww1v << " w2s " << ww2s << " w2v " << ww2v <<endl;
-     //  cout << "w3s "<<ww3s << " w3v " << ww3v <<endl;
+      // std::cout << "w1s " << ww1s << " w1v " << ww1v << " w2s " << ww2s << " w2v " << ww2v <<std::endl;
+      // std::cout << "w3s "<<ww3s << " w3v " << ww3v <<std::endl;
 
         //SINGLE-NUCLEON HADRONIC TENSOR
 
