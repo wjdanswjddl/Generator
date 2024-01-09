@@ -273,6 +273,7 @@ double genie::SuSAv2InelGenerator::ComputeMaxXSec(
   double mDelta = pdg_library->Find( genie::kPdgP33m1232_DeltaP )->Mass();
 
   double W = mDelta;
+  if (Ev<0.52){W=0.468*Ev+0.9595;}
   double Tl = 0.9516*Ev - 0.3228;
   double cth = std::min( 1., 0.5395*std::exp(-1.984*Ev) + 0.9956 );
 
