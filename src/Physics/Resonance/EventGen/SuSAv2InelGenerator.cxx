@@ -87,13 +87,13 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
   // Set the kinematic limits for sampling
   // TODO: revisit these and assign better values if needed
   double W_min = genie::constants::kNeutronMass + genie::constants::kPionMass;
-   double W_max = genie::constants::kNeutronMass + Ev;// - Tl - ml;
+   double W_max =genie::constants::kNeutronMass + Ev;// - Tl - ml;
 
   double cth_min = -1.;
   double cth_max =  1.;
 
   double Tl_min = 0.;
-  double Tl_max = Ev - ml;
+  double Tl_max =Ev - ml;
 
   // Calculate the maximum differential cross section or retrieve it
   double xsec_max = this->MaxXSec( evrec );
@@ -134,8 +134,8 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
     interaction->KinePtr()->SetKV( genie::kKVTl, Tl );
 
     // Compute the differential cross section for the current kinematics
-    xsec = fXSecModel->XSec( interaction, genie::kPSTlctl );
-
+   double xsec_ini = fXSecModel->XSec( interaction, genie::kPSTlctl );
+     xsec=xsec_ini*W/pow(genie::constants::kNeutronMass,2);
     LOG( "SuSAv2Inel", pDEBUG ) << "xsec = " << xsec;
 
     // Do the usual check for rejection sampling of the kinematics

@@ -479,7 +479,7 @@ double genie::SuSAv2InelPXSec::Integral(
     for ( int j = 0; j < 100; j++ ) {
       double costh = -1.00 + j*2.00/100;
       double Suma_W = 0.0;
-        double W_max = genie::constants::kNeutronMass + ev - Tl - xmil;
+        double W_max =genie::constants::kNeutronMass + ev - Tl - xmil;
 
           if ( W_max > W_min ) {
 
