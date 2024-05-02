@@ -53,6 +53,8 @@ private:
 
   void SelectLeptonKinematics( GHepRecord* evrec ) const;
   void MakeHadronicFinalState( GHepRecord* evrec ) const;
+  void MakeNuclearRemnant( GHepRecord* evrec ) const;
+  void SwitchToDISEvent( GHepRecord* evrec ) const;
 
   double ComputeMaxXSec( const Interaction* interaction ) const;
 
