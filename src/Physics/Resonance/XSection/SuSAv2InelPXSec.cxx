@@ -473,18 +473,18 @@ double genie::SuSAv2InelPXSec::Integral(
 
 
   double Suma_Tl = 0.0;
-  for ( int i = 0; i < 100; i++ ) {
-    double Tl = i * ( ev - xmil ) / 100;
+  for ( int i = 0; i < 500; i++ ) {
+    double Tl = i * ( ev - xmil ) / 500;
     double Suma_cos = 0.0;
-    for ( int j = 0; j < 100; j++ ) {
-      double costh = -1.00 + j*2.00/100;
+    for ( int j = 0; j < 500; j++ ) {
+      double costh = -1.00 + j*2.00/500;
       double Suma_W = 0.0;
         double W_max =genie::constants::kNeutronMass + ev - Tl - xmil;
 
           if ( W_max > W_min ) {
 
-         double W_step = ( W_max - W_min ) / 100;
-      for( int z = 0; z < 100; z++ ) {
+         double W_step = ( W_max - W_min ) / 500;
+      for( int z = 0; z < 500; z++ ) {
         double W = W_min + W_step*z;
         interaction->KinePtr()->SetKV( genie::kKVTl, Tl );
         interaction->KinePtr()->SetKV( genie::kKVctl, costh );
@@ -495,9 +495,9 @@ double genie::SuSAv2InelPXSec::Integral(
         Suma_W = Suma_W + 2*pi*W*xsec*W_step/pow( rmn,2 );
         }
         } else Suma_W=0.0;
-      Suma_cos = Suma_cos + Suma_W*2.00/100;
+      Suma_cos = Suma_cos + Suma_W*2.00/500;
     }
-    Suma_Tl = Suma_Tl + Suma_cos*( ev - xmil ) / 100;
+    Suma_Tl = Suma_Tl + Suma_cos*( ev - xmil ) / 500;
   }
   double xsec_tot = Suma_Tl;
   return xsec_tot;
