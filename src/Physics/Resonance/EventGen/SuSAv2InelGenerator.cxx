@@ -27,8 +27,15 @@
 #include "Framework/ParticleData/BaryonResUtils.h"
 #include "Framework/ParticleData/PDGLibrary.h"
 #include "Framework/ParticleData/PDGCodes.h"
+#include "Framework/ParticleData/PDGUtils.h"
 #include "Framework/Utils/KineUtils.h"
 #include "Physics/Resonance/EventGen/SuSAv2InelGenerator.h"
+
+namespace {
+
+  enum HadronicFSChoice { Unknown, DeltaRES, OtherRES, DIS };
+
+}
 
 //___________________________________________________________________________
 genie::SuSAv2InelGenerator::SuSAv2InelGenerator()
@@ -56,9 +63,14 @@ void genie::SuSAv2InelGenerator::ProcessEventRecord( GHepRecord* evrec ) const
   const genie::EventGeneratorI* evg = rt_info->RunningThread();
   fXSecModel = evg->CrossSectionAlg();
 
+  // Make the remnant nucleus after removing the struck nucleon (already set)
+  this->MakeNuclearRemnant( evrec );
+
+  // Generate the outgoing lepton
   this->SelectLeptonKinematics( evrec );
 
-  // TODO: construct the hadronic final state here
+  // Generate the outgoing hadrons
+  this->MakeHadronicFinalState( evrec );
 }
 
 //___________________________________________________________________________
@@ -120,7 +132,7 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
     cth = cth_min + ( cth_max - cth_min ) * rnd->RndKine().Rndm();
     Tl = Tl_min + ( Tl_max - Tl_min ) * rnd->RndKine().Rndm();
     W = W_min + ( W_max - W_min ) * rnd->RndKine().Rndm();
- 
+
     if ( W > genie::constants::kNeutronMass + Ev - Tl - ml ) continue;
 
 
@@ -221,6 +233,35 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
 }
 
 //___________________________________________________________________________
+void genie::SuSAv2InelGenerator::MakeNuclearRemnant( genie::GHepRecord* evrec )
+  const
+{
+  // Add the remnant nucleus (= initial nucleus - struck nucleon) to the event
+  // record
+  GHepParticle* target = evrec->TargetNucleus();
+  GHepParticle* hit_nuc = evrec->HitNucleon();
+
+  int Z = target->Z();
+  int A = target->A();
+
+  // Remove the struck nucleon
+  A -= 1;
+  if ( hit_nuc->Pdg() == kPdgProton ) Z -= 1;
+
+  int remnant_pdg = genie::pdg::IonPdgCode( A, Z );
+
+  const TLorentzVector& p4_hit_nuc = *( hit_nuc->P4() );
+  const TLorentzVector& p4tgt = *( target->P4() );
+
+  const TLorentzVector p4 = p4tgt - p4_hit_nuc;
+  const TLorentzVector v4( 0., 0., 0., 0. );
+
+  int mom_idx = evrec->TargetNucleusPosition();
+
+  evrec->AddParticle( remnant_pdg, kIStStableFinalState, mom_idx, -1, -1,
+    -1, p4, v4 );
+}
+//___________________________________________________________________________
 void genie::SuSAv2InelGenerator::Configure( const genie::Registry& config )
 {
   genie::Algorithm::Configure( config );
@@ -251,6 +292,18 @@ void genie::SuSAv2InelGenerator::LoadConfig()
   // section used in rejection method
   this->GetParamDef( "MaxXSec-DiffTolerance", fMaxXSecDiffTolerance, 999999. );
   assert( fMaxXSecDiffTolerance >= 0. );
+
+  // Get sub-algorithm that handles preparation of RES final states
+  fRESHadronGenerator = dynamic_cast< const EventRecordVisitorI* >(
+    this->SubAlg( "RESHadronGenerator" )
+  );
+  assert( fRESHadronGenerator );
+
+  // Get sub-algorithm that handles preparation of DIS final states
+  fDISHadronGenerator = dynamic_cast< const EventRecordVisitorI* >(
+    this->SubAlg( "DISHadronGenerator" )
+  );
+  assert( fDISHadronGenerator );
 }
 
 //____________________________________________________________________________
@@ -343,4 +396,153 @@ double genie::SuSAv2InelGenerator::ComputeMaxXSec(
   max_xsec *= fSafetyFactor;
 
   return max_xsec;
+}
+//___________________________________________________________________________
+void genie::SuSAv2InelGenerator::MakeHadronicFinalState( GHepRecord* evrec )
+  const
+{
+  HadronicFSChoice my_choice = HadronicFSChoice::Unknown;
+
+  // The SuSAv2 calculation is for the inclusive cross section, so we adopt
+  // an ad hoc procedure for deciding whether to generate a final state
+  // based on GENIE's native RES or DIS treatment.
+  genie::Interaction* interaction = evrec->Summary();
+  double Q2 = interaction->Kine().Q2( true );
+  double W = interaction->Kine().W( true );
+  double Ev = interaction->InitState().ProbeE( genie::kRfLab );
+
+  // If Q^2 or W is above one of these thresholds, unconditionally treat the
+  // event as DIS
+  // TODO: remove hard-coded kinematic limits in this function (make them
+  // configurable via XML)
+  // TODO: also adjust to respect existing W cut in CommonParam.xml
+  if ( Q2 > 3.0 || W > 2.1 ) {
+    my_choice = HadronicFSChoice::DIS;
+  }
+  // If W is below this threshold, assume pure RES through the Delta resonance
+  else if ( W < 1.4 ) {
+    my_choice = DeltaRES;
+    interaction->ExclTagPtr()->SetResonance( genie::EResonance::kP33_1232 );
+    fRESHadronGenerator->ProcessEventRecord( evrec );
+  }
+  else {
+    // We are in the intermediate region of W, so consider a mixture of RES and
+    // DIS interactions
+    double ratio_other_RES = 0.085 * Ev + 0.045;
+    double ratio_DIS = std::max( 0., -0.053 * Ev + 0.5183 );
+    double ratio_Delta_RES = std::max( 0., 1. - ratio_other_RES - ratio_DIS );
+    double sum_ratios = ratio_other_RES + ratio_DIS + ratio_Delta_RES;
+
+    // Get access to the random number generators
+    genie::RandomGen* rnd = RandomGen::Instance();
+
+    // Choose a channel based on the relative probabilities
+    double rand = sum_ratios * rnd->RndKine().Rndm();
+    if ( rand <= ratio_Delta_RES ) {
+      my_choice = HadronicFSChoice::DeltaRES;
+    }
+    else if ( rand <= ratio_Delta_RES + ratio_DIS ) {
+      my_choice = HadronicFSChoice::DIS;
+    }
+    else {
+      my_choice = HadronicFSChoice::OtherRES;
+    }
+  }
+
+  // Delegate handling of the hadronic final state to the appropriate
+  // sub-algorithm. In the case of "other RES," first choose the resonance to
+  // use
+  switch ( my_choice ) {
+    case HadronicFSChoice::DIS: {
+
+      // Switch the process information, etc. so that this event is labeled as
+      // DIS (default for this workflow is RES)
+      this->SwitchToDISEvent( evrec );
+
+      // Delegate further event handling to the chosen DIS generator
+      fDISHadronGenerator->ProcessEventRecord( evrec );
+      break;
+    }
+    case HadronicFSChoice::DeltaRES: {
+      interaction->ExclTagPtr()->SetResonance( genie::EResonance::kP33_1232 );
+      fRESHadronGenerator->ProcessEventRecord( evrec );
+      break;
+    }
+    case HadronicFSChoice::OtherRES: {
+      // TODO: implement this part!
+      break;
+    }
+    default: {
+      LOG( "SuSAv2Inel", pERROR )
+        << "*** Failed to select valid hadronic final state";
+      evrec->EventFlags()->SetBitNumber( genie::kHadroSysGenErr, true );
+      genie::exceptions::EVGThreadException exception;
+      exception.SetReason( "Couldn't select hadronic final state" );
+      exception.SwitchOnFastForward();
+      throw exception;
+    }
+  }
+
+}
+//___________________________________________________________________________
+void genie::SuSAv2InelGenerator::SwitchToDISEvent( GHepRecord* evrec ) const
+{
+  // Relabel the event (default for this generator is RES) to DIS in the process
+  // info. Keep the interaction type (CC, etc.) unchanged
+  genie::Interaction* interaction = evrec->Summary();
+  genie::ProcessInfo* proc = interaction->ProcInfoPtr();
+  genie::InteractionType_t inter_type = proc->InteractionTypeId();
+  proc->Set( genie::kScDeepInelastic, inter_type );
+
+  // Set the hit quark. The recipe depends on the probe and interaction type
+  int probe_pdg = interaction->InitState().ProbePdg();
+
+  bool is_cc = proc->IsWeakCC();
+  bool is_nc_or_em = proc->IsWeakNC();
+
+  // For CC events, charge conservation ensures that only one valence quark
+  // species can participate, so just pick the relevant one and call it good.
+  int hit_q_pdg = kPdgDQuark;
+  genie::Target* tgt = interaction->InitState().TgtPtr();
+
+  if ( is_cc ) {
+    // For antineutrinos, we want the other option
+    if ( probe_pdg < 0 ) hit_q_pdg = kPdgUQuark;
+  }
+  else if ( !is_nc_or_em ) {
+    LOG( "SuSAv2Inel", pWARN )
+      << "*** Could not select a valid hit quark for the interaction";
+    evrec->EventFlags()->SetBitNumber( genie::kKineGenErr, true );
+    genie::exceptions::EVGThreadException exception;
+    exception.SetReason( "Couldn't select hit quark" );
+    exception.SwitchOnFastForward();
+    throw exception;
+  }
+  else {
+    // For NC and EM processes, set the hit quark considering only valence
+    // quarks in the struck nucleon with equal probabilities
+    // TODO: do something better!
+    int hit_nuc_pdg = tgt->HitNucPdg();
+
+    // Set the up quark probability for a neutron first
+    double up_prob = 1. / 3.;
+    if ( hit_nuc_pdg == genie::kPdgProton ) {
+      up_prob = 2. / 3.;
+    }
+
+    // Throw a random number to pick an up or down quark
+    genie::RandomGen* rnd = RandomGen::Instance();
+    double rand = rnd->RndKine().Rndm();
+
+    // Already set as the default value above
+    //hit_q_pdg = kPdgDQuark;
+    if ( rand <= up_prob ) hit_q_pdg = kPdgUQuark;
+  }
+
+  // Set the hit quark PDG code in the interaction
+  tgt->SetHitQrkPdg( hit_q_pdg );
+
+  // We only consider valence quarks for now
+  // TODO: do something better
+  tgt->SetHitSeaQrk( false );
 }

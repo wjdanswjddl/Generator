@@ -17,6 +17,10 @@ Cache-MinEnergy          double  Yes   minimum energy for which max xsec is cach
 
   <param_set name="Default">
     <param type="string" name="CommonParam">  NonResBackground    </param>
+
+    <param type="alg" name="RESHadronGenerator"> genie::RESHadronicSystemGenerator/Default </param>
+    <param type="alg" name="DISHadronGenerator"> genie::DISHadronicSystemGenerator/Default </param>
+
   </param_set>
 
 
@@ -29,4 +33,3 @@ Cache-MinEnergy          double  Yes   minimum energy for which max xsec is cach
 -->
 
 </alg_conf>
-
