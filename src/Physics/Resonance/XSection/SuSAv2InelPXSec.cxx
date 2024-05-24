@@ -324,7 +324,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
           //Definition of scaling variable and Psi and Psi'
           double xlambdap_RMF=(w - Eshift_RMF)/(2*rmn);
           double taup_RMF=xk*xk - xlambdap_RMF*xlambdap_RMF;
-          double rhoxp_RMF=1 + (xmux*xmux -1)/(4*taup_RMF);
+          double rhoxp_RMF=1 + (xmux*xmux -1)/(4*tau);
 
           double psip_RMF=(xlambdap_RMF - taup_RMF*rhoxp_RMF)/
           (sqrt(xiF)*sqrt(taup_RMF*(1 + xlambdap_RMF*rhoxp_RMF) + xk*sqrt(taup_RMF*(1 + taup_RMF*rhoxp_RMF*rhoxp_RMF))));
@@ -361,7 +361,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
           //Definition of scaling variable and Psi and Psi'
           double xlambda_RPWIA=(w - Eshift_RPWIA)/(2*rmn);
           double taup_RPWIA=xk*xk - xlambda_RPWIA*xlambda_RPWIA;
-          double rhoxp_RPWIA=1 + (xmux*xmux - 1)/(4*taup_RPWIA);
+          double rhoxp_RPWIA=1 + (xmux*xmux - 1)/(4*tau);
 
           //cout << "xlambda RPWIA " << xlambda_RPWIA << " taup " << taup_RPWIA << " rhox " << rhoxp_RPWIA <<endl;
 
@@ -489,10 +489,10 @@ double genie::SuSAv2InelPXSec::Integral(
   }
 
   double Suma_Tl = 0.0;
-  for ( int i = 0; i < 500; i++ ) {
+  for ( int i = 0; i <= 500; i++ ) {
     double Tl = i * ( ev - xmil ) / 500;
     double Suma_cos = 0.0;
-    for ( int j = 0; j < 500; j++ ) {
+    for ( int j = 0; j <= 500; j++ ) {
       double costh = -1.00 + j*2.00/500;
       double Suma_W = 0.0;
       
@@ -675,7 +675,7 @@ double genie::SuSAv2InelPXSec::Integral(
           //Definition of scaling variable and Psi and Psi'
           double xlambdap_RMF=(w - Eshift_RMF)/(2*rmn);
           double taup_RMF=xk*xk - xlambdap_RMF*xlambdap_RMF;
-          double rhoxp_RMF=1 + (xmux*xmux -1)/(4*taup_RMF); 
+          double rhoxp_RMF=1 + (xmux*xmux -1)/(4*tau); 
           
           double psip_RMF=(xlambdap_RMF - taup_RMF*rhoxp_RMF)/
           (sqrt(xiF)*sqrt(taup_RMF*(1 + xlambdap_RMF*rhoxp_RMF) + xk*sqrt(taup_RMF*(1 + taup_RMF*rhoxp_RMF*rhoxp_RMF))));
@@ -711,7 +711,7 @@ double genie::SuSAv2InelPXSec::Integral(
           //Definition of scaling variable and Psi and Psi'
           double xlambda_RPWIA=(w - Eshift_RPWIA)/(2*rmn);
           double taup_RPWIA=xk*xk - xlambda_RPWIA*xlambda_RPWIA;
-          double rhoxp_RPWIA=1 + (xmux*xmux - 1)/(4*taup_RPWIA);
+          double rhoxp_RPWIA=1 + (xmux*xmux - 1)/(4*tau);
 
           //cout << "xlambda RPWIA " << xlambda_RPWIA << " taup " << taup_RPWIA << " rhox " << rhoxp_RPWIA <<endl;
         
