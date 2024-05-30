@@ -327,9 +327,9 @@ double genie::SuSAv2InelGenerator::ComputeMaxXSec(
   genie::PDGLibrary* pdg_library = genie::PDGLibrary::Instance();
   double mDelta = pdg_library->Find( genie::kPdgP33m1232_DeltaP )->Mass();
 
-  double W = mDelta;
-  if (Ev<0.52){W=0.468*Ev+0.9595;}
-  double Tl = 0.9516*Ev - 0.3228;
+  double W;
+  if (Ev<15.0){W=mDelta;} else if (Ev < 17.0) {W=1.5;} else if (Ev < 23.0) {W=1.7;} else {W=2.2;}
+  double Tl = 0.8431*Ev + 0.3386;
   double cth = std::min( 1., 0.5395*std::exp(-1.984*Ev) + 0.9956 );
 
   interaction->KinePtr()->SetW( W );
