@@ -189,23 +189,30 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
      if(W > rmn + w) return 0;
 
     int j=0;
-     for (int m=0; m<1001000; ++m)
-     {
-        if( (-Q2)>=Q2vec[m] &&  (-Q2)<=Q2vec[m+1000]) break;
-        
-         //  std::cout << (-Q2) << " " << Q2vec[m] <<" "<<Q2vec[m + 1000] << " " << j << " " << Q2vec[j]/(4*rmn*rmn)<< std::endl;
-           j=j+1;
-     }
-
-       int n_step=j;
+    int high = 1002001;
+    int low = 0;
+    while((high - low) > 1){
+      int mid = low + (high - low) / 2;
+      j = mid;
+      if(Q2vec[mid] < fabs(Q2))
+        low = mid + 1;
+      else
+        high = mid - 1;
+    }
+    int n_step = (j/1001)*1001;
 
    // We search the value of the invariant mass that it is the closest to the upper limit that the kinematics gave us.
 
     int f=0;
-    for ( int i = 0; i < 1000; ++i )
-    {
-       if ( W >= Wvec[i + n_step] && W <= Wvec[i + n_step + 1] ) break;
-       f=f+1;
+    high = 1001;
+    low = 0;
+    while((high - low) > 1){
+      int mid = low + (high - low) / 2;
+      f = mid;
+      if(Wvec[n_step + mid] < W)
+        low = mid + 1;
+      else
+        high = mid - 1;
     }
     int i_step = f;
 
@@ -542,16 +549,17 @@ double genie::SuSAv2InelPXSec::Integral(
      to exchange momentum and exchange energy. */
     
     int t=0;
-     for (int m=0; m<1001000; ++m)
-     {           
-        if( abs(Q2)>=Q2vec[m]&&abs(Q2)<=Q2vec[m+1000]) break;
-           t=t+1;
- 
- 
-     }
-
-       int n_step=t;
-   
+    int high = 1002001;
+    int low = 0;
+    while((high - low) > 1){
+      int mid = low + (high - low) / 2;
+      t = mid;
+      if(Q2vec[mid] < fabs(Q2))
+        low = mid + 1;
+      else
+        high = mid - 1;
+    }
+    int n_step = (t/1001)*1001;
 
           if ( W_max > W_min ) {
 
@@ -559,13 +567,19 @@ double genie::SuSAv2InelPXSec::Integral(
       for( int z = 0; z < 500; z++ ) {
         double W = W_min + W_step*z;
    
-      int c=0;
-     for (int r=0; r<1000; ++r)
-     {   
-        if( W>=Wvec[r + n_step]&&W<=Wvec[r + n_step +1]) break;
-        c=c+1;
-     }
-       int f_step=c;
+
+    int c=0;
+    high = 1001;
+    low = 0;
+    while((high - low) > 1){
+      int mid = low + (high - low) / 2;
+      c = mid;
+      if(Wvec[n_step + mid] < W)
+        low = mid + 1;
+      else
+        high = mid - 1;
+    }
+    int f_step = c;
    
         double xmux=Wvec[f_step + n_step]/rmn;
         double w1_p=w1pvec[f_step + n_step];
