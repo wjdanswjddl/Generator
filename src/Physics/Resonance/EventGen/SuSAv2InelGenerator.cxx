@@ -101,7 +101,7 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
   // Set the kinematic limits for sampling
   // TODO: revisit these and assign better values if needed
   double W_min = genie::constants::kNeutronMass + genie::constants::kPionMass;
-   double W_max =genie::constants::kNeutronMass + Ev;// - Tl - ml;
+   double W_max =genie::constants::kNeutronMass + Ev; // - Tl - ml;
 
   double cth_min = -1.;
   double cth_max =  1.;
@@ -328,9 +328,14 @@ double genie::SuSAv2InelGenerator::ComputeMaxXSec(
   double mDelta = pdg_library->Find( genie::kPdgP33m1232_DeltaP )->Mass();
 
   double W;
+  double Tl;
+  double cth;
+
   if (Ev<15.0){W=mDelta;} else if (Ev < 17.0) {W=1.5;} else if (Ev < 23.0) {W=1.7;} else {W=2.2;}
-  double Tl = 0.8431*Ev + 0.3386;
-  double cth = std::min( 1., 0.5395*std::exp(-1.984*Ev) + 0.9956 );
+  if(Ev<1.5) {Tl=std::max(0.,0.8805*Ev -0.2994);} else if (Ev<2.5 && Ev>2.0) {Tl=0.9742*Ev -0.3889;} else {Tl=0.8431*Ev + 0.3386;}
+  if(Ev< 0.25) {cth=0.0;} else if(Ev < 1.5) {cth= -0.001567*pow(Ev,-4.832) + 0.9413;} else {cth =std::min( 1., 0.5395*std::exp(-1.984*Ev) + 0.998 );}
+
+
 
   interaction->KinePtr()->SetW( W );
   interaction->KinePtr()->SetKV( genie::kKVTl, Tl );
@@ -344,15 +349,28 @@ double genie::SuSAv2InelGenerator::ComputeMaxXSec(
   // move on each iteration towards the maximum value
   double step_W = 0.5;
   double step_Tl = 0.5;
-  double step_cth = 0.5;
+  double step_cth = 0.1;
   const int MAX_STEPS = 1000;
   const int MIN_STEP_W = 0.01;
   int step_iter = 0;
 
   while ( step_iter < MAX_STEPS && step_W > MIN_STEP_W ) {
-    std::vector< double > Ws = { W - step_W, W, W + step_W };
-    std::vector< double > Tls = { Tl - step_Tl, Tl, Tl + step_Tl };
-    std::vector< double > cths = { cth - step_cth, cth, cth + step_cth };
+  
+      double W_min=genie::constants::kNucleonMass + genie::constants::kPionMass;
+    if(W_min < W-step_W){W_min=W-step_W;}
+    
+    double Tl_min=0.0;
+    if(Tl_min < Tl-step_Tl){Tl_min=Tl-step_Tl;}
+    
+     double cth_min=-1.0;
+    if(cth_min < cth-step_cth){cth_min=cth-step_cth;}
+    
+     double cth_max=1.0;
+    if(cth_max > cth+step_cth){cth_max=cth+step_cth;}
+  
+    std::vector< double > Ws = { W_min, W, W + step_W };
+    std::vector< double > Tls = { Tl_min, Tl, Tl + step_Tl };
+    std::vector< double > cths = { cth_min, cth, cth_max };
 
     std::vector< genie::Interaction > interaction_vec;
     for ( const double& cur_W : Ws ) {

@@ -39,6 +39,8 @@ public :
   SuSAv2InelGenerator( std::string config );
  ~SuSAv2InelGenerator();
 
+
+
   // Implement the EventRecordVisitorI interface
   void ProcessEventRecord( GHepRecord* evrec ) const;
 
@@ -46,7 +48,7 @@ public :
   // from the configuration options
   void Configure( const Registry& config );
   void Configure( std::string config );
-
+  double ComputeMaxXSec( const Interaction* interaction ) const;
 private:
 
   void LoadConfig();
@@ -56,7 +58,7 @@ private:
   void MakeNuclearRemnant( GHepRecord* evrec ) const;
   void SwitchToDISEvent( GHepRecord* evrec ) const;
 
-  double ComputeMaxXSec( const Interaction* interaction ) const;
+
 
   double fWcut; ///< Wcut parameter in DIS/RES joining scheme
   double fSafetyFactor;
