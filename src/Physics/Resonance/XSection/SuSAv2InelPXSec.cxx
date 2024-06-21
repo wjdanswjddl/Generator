@@ -189,7 +189,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
      if(W > rmn + w) return 0;
 
     int j=0;
-    int high = 1002001;
+    int high = 2003001;
     int low = 0;
     while((high - low) > 1){
       int mid = low + (high - low) / 2;
@@ -459,7 +459,7 @@ double genie::SuSAv2InelPXSec::XSec( const genie::Interaction* interaction,
      }
    }
 
-   if ( std::isnan(CS_inel) || CS_inel < 0. ) CS_inel = 0.0;
+   if ( std::isnan(CS_inel) || CS_inel < 0. ||  W > rmn + w  ) CS_inel = 0.0;
 
    return CS_inel;
 }
@@ -499,8 +499,8 @@ double genie::SuSAv2InelPXSec::Integral(
   for ( int i = 0; i <= 500; i++ ) {
     double Tl = i * ( ev - xmil ) / 500;
     double Suma_cos = 0.0;
-    for ( int j = 0; j <= 500; j++ ) {
-      double costh = -1.00 + j*2.00/500;
+    for ( int j = 0; j <= 2000; j++ ) {
+      double costh = -1.00 + j*2.00/2000;
       double Suma_W = 0.0;
       
       
@@ -549,7 +549,7 @@ double genie::SuSAv2InelPXSec::Integral(
      to exchange momentum and exchange energy. */
     
     int t=0;
-    int high = 1002001;
+    int high = 2003001;
     int low = 0;
     while((high - low) > 1){
       int mid = low + (high - low) / 2;
@@ -806,7 +806,7 @@ double genie::SuSAv2InelPXSec::Integral(
         Suma_W = Suma_W + 2*pi*W*CS_inel*W_step/pow( rmn,2 );
         }
         } else Suma_W=0.0;
-      Suma_cos = Suma_cos + Suma_W*2.00/500;
+      Suma_cos = Suma_cos + Suma_W*2.00/2000;
     }
     Suma_Tl = Suma_Tl + Suma_cos*( ev - xmil ) / 500;
   }

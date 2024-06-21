@@ -103,7 +103,7 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
   double W_min = genie::constants::kNeutronMass + genie::constants::kPionMass;
    double W_max =genie::constants::kNeutronMass + Ev; // - Tl - ml;
 
-  double cth_min = -1.;
+  double cth_min =  -1.;
   double cth_max =  1.;
 
   double Tl_min = 0.;
@@ -135,7 +135,7 @@ void genie::SuSAv2InelGenerator::SelectLeptonKinematics( GHepRecord* evrec )
     Tl = Tl_min + ( Tl_max - Tl_min ) * rnd->RndKine().Rndm();
     W = W_min + ( W_max - W_min ) * rnd->RndKine().Rndm();
 
-    if ( W > genie::constants::kNeutronMass + Ev - Tl - ml ) continue;
+    
 
 
 
@@ -281,7 +281,7 @@ void genie::SuSAv2InelGenerator::Configure( std::string config )
 void genie::SuSAv2InelGenerator::LoadConfig()
 {
   // Safety factor for the maximum differential cross section
-  this->GetParamDef( "MaxXSec-SafetyFactor", fSafetyFactor, 1.25 );
+  this->GetParamDef( "MaxXSec-SafetyFactor", fSafetyFactor, 1.5 );
 
   // Minimum energy for which max xsec would be cached, forcing explicit
   // calculation for lower eneries
@@ -331,9 +331,12 @@ double genie::SuSAv2InelGenerator::ComputeMaxXSec(
   double Tl;
   double cth;
 
-  if (Ev<15.0){W=mDelta;} else if (Ev < 17.0) {W=1.5;} else if (Ev < 23.0) {W=1.7;} else {W=2.2;}
-  if(Ev<1.5) {Tl=std::max(0.,0.8805*Ev -0.2994);} else if (Ev<2.5 && Ev>2.0) {Tl=0.9742*Ev -0.3889;} else {Tl=0.8431*Ev + 0.3386;}
-  if(Ev< 0.25) {cth=0.0;} else if(Ev < 1.5) {cth= -0.001567*pow(Ev,-4.832) + 0.9413;} else {cth =std::min( 1., 0.5395*std::exp(-1.984*Ev) + 0.998 );}
+  //if (Ev<15.0){W=mDelta;} else if (Ev < 17.0) {W=1.5;} else if (Ev < 23.0) {W=1.7;} else {W=2.2;}
+   //if (Ev<20.0){W=mDelta;} else if (Ev < 27.0) {W=1.42;} else {W=2.2;}
+  W=mDelta;
+  //if(Ev<1.5) {Tl=std::max(0.,0.8805*Ev -0.2994);} else if (Ev<2.5 && Ev>2.0) {Tl=0.9742*Ev -0.3889;} else if (Ev < 10) {Tl=0.8431*Ev + 0.3386;} else {Tl=0.9982*Ev -0.337;}
+  Tl=std::max(0.,0.9982*Ev -0.337);
+  if(Ev< 0.25) {cth=0.0;} else if(Ev < 1.5) {cth= -0.001567*pow(Ev,-4.832) + 0.9413;} else {cth =std::min( 1., 0.5395*std::exp(-1.984*Ev) + 0.9999 );}
 
 
 
@@ -347,14 +350,18 @@ double genie::SuSAv2InelGenerator::ComputeMaxXSec(
 
   // Step around the guess in all directions with a decreasing step size,
   // move on each iteration towards the maximum value
-  double step_W = 0.5;
+  double step_W = 0.01;
   double step_Tl = 0.5;
-  double step_cth = 0.1;
+    if (Ev<10.0) {step_Tl=0.1;}
+;  double step_cth = 0.0001;
+  if (Ev<2.0) {step_cth=0.01;}
   const int MAX_STEPS = 1000;
-  const int MIN_STEP_W = 0.01;
+  const int MIN_STEP_W = 0.001;
   int step_iter = 0;
 
-  while ( step_iter < MAX_STEPS && step_W > MIN_STEP_W ) {
+  while ( step_iter < MAX_STEPS && step_Tl > MIN_STEP_W ) {
+  
+     //  if(Ev<20){step_W=0.0;}
   
       double W_min=genie::constants::kNucleonMass + genie::constants::kPionMass;
     if(W_min < W-step_W){W_min=W-step_W;}
