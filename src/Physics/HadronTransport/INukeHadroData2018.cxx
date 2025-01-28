@@ -864,7 +864,7 @@ void INukeHadroData2018::LoadCrossSections(void)
   {
     const int pipAAbs_f_nfiles = 18;
     const int pipAAbs_f_nuclei[pipAAbs_f_nfiles] = {1, 2, 3, 4, 7, 9, 12, 16, 27, 48, 56, 58, 63, 93, 120, 165, 181, 209};
-    const int pipAAbs_f_npoints = 111;
+    const int pipAAbs_f_npoints = 738;
 
     TfracPipA_Abs = new TGraph2D(pipAAbs_f_npoints);
     TfracPipA_Abs->SetNameTitle("TfracPipA_Abs","TfracPipA_Abs");
@@ -875,7 +875,7 @@ void INukeHadroData2018::LoadCrossSections(void)
     for(int ifile=0; ifile < pipAAbs_f_nfiles; ifile++) {
       ostringstream ADep_datafile;
       int nucleus = pipAAbs_f_nuclei[ifile];
-      ADep_datafile << data_dir << "/tot_xsec/pipA_abs_frac/pip" << nucleus << "_abs_frac.txt";
+      ADep_datafile << data_dir << "/tot_xsec/pipA_abs_frac/pip" << nucleus << "_abs_frac_graph.txt";
       TGraph * buff = new TGraph(ADep_datafile.str().c_str());
       buff->SetNameTitle("buff","buff");
       for(int i=0; i < buff->GetN(); i++) {
@@ -896,7 +896,7 @@ void INukeHadroData2018::LoadCrossSections(void)
   {
     const int pipACEx_f_nfiles = 18;
     const int pipACEx_f_nuclei[pipACEx_f_nfiles] = {1, 2, 3, 4, 7, 9, 12, 16, 27, 48, 56, 58, 63, 93, 120, 165, 181, 209};
-    const int pipACEx_f_npoints = 129;
+    const int pipACEx_f_npoints = 738;
 
     TfracPipA_CEx = new TGraph2D(pipACEx_f_npoints);
     TfracPipA_CEx->SetNameTitle("TfracPipA_CEx","TfracPipA_CEx");
@@ -908,7 +908,7 @@ void INukeHadroData2018::LoadCrossSections(void)
     for(int ifile=0; ifile < pipACEx_f_nfiles; ifile++) {
       ostringstream ADep_datafile;
       int nucleus = pipACEx_f_nuclei[ifile];
-      ADep_datafile << data_dir << "/tot_xsec/pipA_cex_frac/pip" << nucleus << "_cex_frac.txt";
+      ADep_datafile << data_dir << "/tot_xsec/pipA_cex_frac/pip" << nucleus << "_cex_frac_graph.txt";
       TGraph * buff = new TGraph(ADep_datafile.str().c_str());
       buff->SetNameTitle("buff","buff");
       for(int i=0; i < buff->GetN(); i++) {
@@ -1107,9 +1107,9 @@ void INukeHadroData2018::LoadCrossSections(void)
 
   // kIHNFtInelas, pip + A                                                            PipA_Inelas_frac
   {
-    const int pipAInelas_f_nfiles = 20;
-    const int pipAInelas_f_nuclei[pipAInelas_f_nfiles] = {1, 2, 3, 4, 7, 9, 12, 16, 27, 40, 48, 56, 58, 63, 93, 120, 165, 181, 208, 209};
-    const int pipAInelas_f_npoints = 118;
+    const int pipAInelas_f_nfiles = 19;
+    const int pipAInelas_f_nuclei[pipAInelas_f_nfiles] = {1, 2, 3, 4, 7, 9, 12, 16, 27, 40, 48, 56, 58, 63, 93, 120, 165, 181, 209};
+    const int pipAInelas_f_npoints = 779;
 
     TfracPipA_Inelas = new TGraph2D(pipAInelas_f_npoints);
     TfracPipA_Inelas->SetNameTitle("TfracPipA_Inelas","TfracPipA_Inelas");
@@ -1121,7 +1121,7 @@ void INukeHadroData2018::LoadCrossSections(void)
     for(int ifile=0; ifile < pipAInelas_f_nfiles; ifile++) {
       ostringstream ADep_datafile;
       int nucleus = pipAInelas_f_nuclei[ifile];
-      ADep_datafile << data_dir << "/tot_xsec/pipA_inelas_frac/pip" << nucleus << "_inelas_frac.txt";
+      ADep_datafile << data_dir << "/tot_xsec/pipA_inelas_frac/pip" << nucleus << "_inelas_frac_graph.txt";
       TGraph * buff = new TGraph(ADep_datafile.str().c_str());
       buff->SetNameTitle("buff","buff");
       for(int i=0; i < buff->GetN(); i++) {
@@ -1143,7 +1143,7 @@ void INukeHadroData2018::LoadCrossSections(void)
    {
     const int pipAPiPro_f_nfiles = 17;
     const int pipAPiPro_f_nuclei[pipAPiPro_f_nfiles] = {1, 2, 3, 4, 7, 9, 12, 16, 48, 56, 58, 63, 93, 120, 165, 181, 209};
-    const int pipAPiPro_f_npoints = 76;
+    const int pipAPiPro_f_npoints = 697;
 
     TfracPipA_PiPro = new TGraph2D(pipAPiPro_f_npoints);
     TfracPipA_PiPro->SetNameTitle("TfracPipA_PiPro","TfracPipA_PiPro");
@@ -1155,7 +1155,7 @@ void INukeHadroData2018::LoadCrossSections(void)
     for(int ifile=0; ifile < pipAPiPro_f_nfiles; ifile++) {
       ostringstream ADep_datafile;
       int nucleus = pipAPiPro_f_nuclei[ifile];
-      ADep_datafile << data_dir << "/tot_xsec/pipA_pipro_frac/pip" << nucleus << "_pipro_frac.txt";
+      ADep_datafile << data_dir << "/tot_xsec/pipA_pipro_frac/pip" << nucleus << "_pipro_frac_graph.txt";
       TGraph * buff = new TGraph(ADep_datafile.str().c_str());
       buff->SetNameTitle("buff","buff");
       for(int i=0; i < buff->GetN(); i++) {
