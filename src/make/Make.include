@@ -481,7 +481,7 @@ RANLIB       := ranlib
 SOCMD         = $(LD)
 OutPutOpt     = -o
 SOMINF        =
-EXTRALIBS     = -lnsl
+EXTRALIBS     =
 endif
 
 # LINUX / 64-bit x86 / with gcc
@@ -509,7 +509,7 @@ RANLIB       := ranlib
 SOCMD         = $(LD)
 OutPutOpt     = -o
 SOMINF        =
-EXTRALIBS     = -lnsl
+EXTRALIBS     =
 endif
 
 #-------------------------------------------------------------------
