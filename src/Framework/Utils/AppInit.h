@@ -21,15 +21,17 @@
 #ifndef _APP_INIT_UTILS_H_
 #define _APP_INIT_UTILS_H_
 
+#include <string>
+
 namespace genie {
 namespace utils {
 
 namespace app_init
 {
   void RandGen        (long int seed);
-  void XSecTable      (string inpfile, bool require_table);
-  void MesgThresholds (string inpfile);
-  void CacheFile      (string inpfile);
+  void XSecTable      (std::string inpfile, bool require_table);
+  void MesgThresholds (std::string inpfile);
+  void CacheFile      (std::string inpfile);
 
 } // app_init namespace
 } // utils namespace

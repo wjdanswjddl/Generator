@@ -19,17 +19,19 @@
 #ifndef _GSL_UTILS_H_
 #define _GSL_UTILS_H_
 
+#include <string>
+
 #include <Math/AllIntegrationTypes.h>
 
 namespace genie {
 namespace utils {
 namespace gsl   {
 
-  ROOT::Math::IntegrationOneDim::Type   
-       Integration1DimTypeFromString (string type);
+  ROOT::Math::IntegrationOneDim::Type
+       Integration1DimTypeFromString (std::string type);
 
-  ROOT::Math::IntegrationMultiDim::Type 
-       IntegrationNDimTypeFromString (string type);
+  ROOT::Math::IntegrationMultiDim::Type
+       IntegrationNDimTypeFromString (std::string type);
 
 } // namespace gsl
 } // namespace utils

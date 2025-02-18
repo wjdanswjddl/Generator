@@ -19,6 +19,8 @@
 #ifndef _GENIE_XSEC_FUNCTION_GSL_WRAPPERS_H_
 #define _GENIE_XSEC_FUNCTION_GSL_WRAPPERS_H_
 
+#include <string>
+
 #include <Math/IFunction.h>
 #include <Math/IntegratorMultiDim.h>
 
@@ -201,8 +203,8 @@ private:
 
 //.....................................................................................
 //
-// genie::utils::gsl::d2XSec_dxdy_Ey 
-// A 1-D cross section function: d2xsec/dxdy = f(x)|(fixed:E,y) 
+// genie::utils::gsl::d2XSec_dxdy_Ey
+// A 1-D cross section function: d2xsec/dxdy = f(x)|(fixed:E,y)
 //
 class d2XSec_dxdy_Ey: public ROOT::Math::IBaseFunctionOneDim
 {
@@ -269,7 +271,7 @@ private:
 
 //.....................................................................................
 //
-// 
+//
 //
 class d5XSecAR : public ROOT::Math::IBaseFunctionMultiDim
 {
@@ -299,7 +301,7 @@ class d5Xsec_dEldOmegaldOmegapi: public ROOT::Math::IBaseFunctionMultiDim
 public:
   d5Xsec_dEldOmegaldOmegapi(const XSecAlgorithmI * m, const Interaction * i);
  ~d5Xsec_dEldOmegaldOmegapi();
-        
+
   // ROOT::Math::IBaseFunctionMultiDim interface
   unsigned int                        NDim   (void)               const;
   double                              DoEval (const double * xin) const;
@@ -326,7 +328,7 @@ public:
   unsigned int                        NDim   (void)               const;
   double                              DoEval (const double * xin) const;
   ROOT::Math::IBaseFunctionMultiDim * Clone  (void)               const;
-  
+
   double                              GetFactor()                 const;
   void                                SetFactor(double factor);
 
@@ -351,7 +353,7 @@ public:
   unsigned int                        NDim   (void)               const;
   double                              DoEval (const double * xin) const;
   d3Xsec_dOmegaldThetapi            * Clone  (void)               const;
-  
+
   // Specific to this class
   void SetE_lep (double E_lepton) const;
   // Yes, it's a const setter
@@ -372,7 +374,7 @@ class dXSec_dElep_AR: public ROOT::Math::IBaseFunctionOneDim
 {
 public:
   dXSec_dElep_AR(const XSecAlgorithmI * m, const Interaction * i,
-                 string gsl_nd_integrator_type, double gsl_relative_tolerance,
+                 std::string gsl_nd_integrator_type, double gsl_relative_tolerance,
                  unsigned int max_n_calls);
   dXSec_dElep_AR() {};
  ~dXSec_dElep_AR();
@@ -384,21 +386,21 @@ public:
 private:
   const XSecAlgorithmI * fModel;
   const Interaction *    fInteraction;
-  
+
   const genie::utils::gsl::d3Xsec_dOmegaldThetapi * func;
-  
+
   mutable ROOT::Math::IntegratorMultiDim integrator;
-  
+
   double kine_min[3];
   double kine_max[3];
-  
-  string fGSLIntegratorType;
+
+  std::string fGSLIntegratorType;
   double fGSLRelTol;
   unsigned int fGSLMaxCalls;
 };
-                  
+
 ///.....................................................................................
-/// 
+///
 /// dXSec_Log_Wrapper
 /// Redistributes variables over a range to a e^-x distribution.
 /// Allows the integrator to use a logarithmic series of points while calling uniformly.
@@ -408,22 +410,22 @@ class dXSec_Log_Wrapper: public ROOT::Math::IBaseFunctionMultiDim
     dXSec_Log_Wrapper(const ROOT::Math::IBaseFunctionMultiDim * fn,
                       bool * ifLog, double * min, double * maxes);
    ~dXSec_Log_Wrapper();
-  
+
     // ROOT::Math::IBaseFunctionMultiDim interface
     unsigned int                        NDim   (void)               const;
     double                              DoEval (const double * xin) const;
     ROOT::Math::IBaseFunctionMultiDim * Clone  (void)               const;
-  
+
   private:
     const ROOT::Math::IBaseFunctionMultiDim * fFn;
     bool * fIfLog;
     double * fMins;
     double * fMaxes;
 };
-  
+
 } // gsl   namespace
 } // utils namespace
 } // genie namespace
 
-#endif   
+#endif
 
